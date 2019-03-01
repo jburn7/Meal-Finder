@@ -1,6 +1,6 @@
 Link to Website
 
-As a logged-in user, I want to be able to access the link to the website of the restaurant I choose, so that I can explore more information about the restaurant.
+All users will able to access the link to the website of the restaurant they choose, so that I can explore more information about the restaurant.
 
 Acceptance criteria
 
