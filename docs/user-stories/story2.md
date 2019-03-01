@@ -4,4 +4,4 @@ All users will able to access the link to the website of the restaurant they cho
 
 Acceptance criteria
 
-As a user, when I click on the website link of the description page of a restaurant, the system will direct me the website of that restaurant by using the default browser. When I click the ‘Close’ button, the system should redirect me to the original description page.
+As a user, when I click on the website link of the description page of a restaurant, the system will direct me the website of that restaurant by using the default browser. This link will be present in every meal listing, based on which restaurant that particular meal can be found at.
