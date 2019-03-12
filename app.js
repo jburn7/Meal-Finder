@@ -1,10 +1,12 @@
-var express = require('express');
-var app = express();
+var express = require('express')
+var app = express()
+
+app.set('port', (process.env.PORT || 5000))
 
 app.get('/', function (req, res) {
-  res.send('this is our project');
-});
+  res.send('this is our project')
+})
 
-app.listen(0, function () {
-  console.log('App listening on port 3000');
-});
+app.listen(app.get('port'), function () {
+  console.log('Node app running at localhost:' + app.get('port'))
+})
