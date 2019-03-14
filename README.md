@@ -17,7 +17,7 @@ node app.js
 React 
 
 ```
-npx create-react-app app-name-here
-cd app-name-here
+npx create-react-app client
+cd client
 npm start
 ```
