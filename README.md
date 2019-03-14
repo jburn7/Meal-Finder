@@ -3,3 +3,21 @@
 Section A4 Group 2
 
 https://cs411dreamteam.herokuapp.com/
+
+## Setup
+
+Node.js and Express
+
+```
+npm init
+npm install express --save
+node app.js
+```
+
+React 
+
+```
+npx create-react-app app-name-here
+cd app-name-here
+npm start
+```
