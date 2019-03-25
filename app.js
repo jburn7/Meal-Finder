@@ -1,11 +1,13 @@
 const express = require('express')
 const request = require('request')
+const path = require("path")
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
 const app = express()
 
 app.set('port', (process.env.PORT || 5000))
+app.set('views', path.join(__dirname, 'views'))
 app.set('views', './views')
 app.set('view engine', 'pug')
 
@@ -24,7 +26,7 @@ app.post('/', urlencodedParser, function (req, res) {
             {
                 'access-token': process.env.EATSTREET_KEY, // Uses API key in Heroku config vars
                 'street-address': req.body['street-address'],
-                method: 'both'
+                method: 'both',
                 'pickup-radius': '1'
 
                 // latitude: '42.350498',
