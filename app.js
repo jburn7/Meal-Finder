@@ -23,16 +23,15 @@ app.post('/', urlencodedParser, function (req, res) {
     var options = {
         method: 'GET',
         url: 'https://eatstreet.com/publicapi/v1/restaurant/search',
-        qs:
-            {
-                'access-token': process.env.EATSTREET_KEY, // Uses API key in Heroku config vars
-                'street-address': req.body['street-address'],
-                method: 'both',
-                'pickup-radius': '1'
+        qs: {
+            'access-token': process.env.EATSTREET_KEY, // Uses API key in Heroku config vars
+            'street-address': req.body['street-address'],
+            method: 'both',
+            'pickup-radius': '1'
 
-                // latitude: '42.350498',
-                // longitude: '-71.105400',
-            }
+            // latitude: '42.350498',
+            // longitude: '-71.105400',
+        }
     }
     
     request(options, function (error, response, body) {
