@@ -1,7 +1,11 @@
 html
   head
+    style
+      include ../public/css/style.css
   body
-    h1 CS 411 Prototype
-    p Here are some restaurants in your area
+    <div class="container">
+      h1 CS 411 Prototype
+      p Here are some restaurants in your area
 
-    #{data}
+      #{data}
+    </div>
