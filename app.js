@@ -13,7 +13,7 @@ app.get('/', function (req, res) {
         url: 'https://eatstreet.com/publicapi/v1/restaurant/search',
         qs:
             {
-                'access-token': "process.env.EATSTREET_KEY", // Uses API key in Heroku config vars
+                'access-token': process.env.EATSTREET_KEY, // Uses API key in Heroku config vars
                 latitude: '42.350498',
                 longitude: '-71.105400',
                 'pickup-radius': '1'
