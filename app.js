@@ -1,6 +1,7 @@
 // const path = require("path")
 const express = require('express')
 const request = require('request')
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const app = express()
 
 // app.use(express.static(path.join(__dirname, "client", "build")))
@@ -8,17 +9,41 @@ const app = express()
 app.set('port', (process.env.PORT || 5000))
 
 app.get('/', function (req, res) {
-  if (Object.keys(req.query).length == 0) {
-    res.send('After the url type /?id=1234 to display the brewery name. Any id from 1 to 8029 will work.')
-  } 
-  else {
-    request('https://api.openbrewerydb.org/breweries/' + req.query.id, function (error, response, body) {
-      if (!error && response.statusCode == 200) {
-        var info = JSON.parse(body)
-        res.send('Brewery Name: ' + info.name + '<br>' + 'Website: ' + info.website_url)
-      }
-    })
-  }
+    
+    //can generate via Postman or just by looking at the API's documentation
+    var options = {
+        method: 'GET',
+        url: 'https://eatstreet.com/publicapi/v1/restaurant/search',
+        qs:
+            {
+                'access-token': "//TODO: insert eat street api key here",
+                latitude: '42.350498',
+                longitude: '-71.105400',
+                'pickup-radius': '1'
+            }
+    }
+    
+    request(options, function (error, response, body) {
+        if (error) throw new Error(error);
+        
+        var info = JSON.parse(body);
+        
+        var res_html = ""; //build here and send in one res.send()
+        
+        for (i = 0; i < info.restaurants.length; ++i) {
+            res_html += info.restaurants[i].name + '<br>';
+            
+            //TODO: get restaurant id via info.apiKey, then use that id in the following url to get the menu:
+            //https://eatstreet.com/publicapi/v1/restaurant/[apiKey]/menu
+            //so you will need to create a new request() where options just contains the following JSON entries:
+            //method: 'GET', url: //https://eatstreet.com/publicapi/v1/restaurant/[apiKey]/menu
+            
+            //then add the menu's contents to res_html
+            //also when printing please use indents or some other way to indicate that this menu belongs to the given restaurant, so that it is not one long list of restaurants and menu items
+        }
+        
+        res.send(res_html);
+    });
 })
 
 // app.get("*", (req, res) => {
