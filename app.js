@@ -1,10 +1,7 @@
-// const path = require("path")
 const express = require('express')
 const request = require('request')
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const app = express()
-
-// app.use(express.static(path.join(__dirname, "client", "build")))
 
 app.set('port', (process.env.PORT || 5000))
 
@@ -16,7 +13,7 @@ app.get('/', function (req, res) {
         url: 'https://eatstreet.com/publicapi/v1/restaurant/search',
         qs:
             {
-                'access-token': "//TODO: insert eat street api key here",
+                'access-token': "process.env.EATSTREET_KEY", // Uses API key in Heroku config vars
                 latitude: '42.350498',
                 longitude: '-71.105400',
                 'pickup-radius': '1'
@@ -45,10 +42,6 @@ app.get('/', function (req, res) {
         res.send(res_html);
     });
 })
-
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(__dirname, "client", "build", "index.html"));
-// });
 
 app.listen(app.get('port'), function () {
   console.log('Node app running at localhost:' + app.get('port'))
