@@ -8,7 +8,6 @@ const app = express()
 
 app.set('port', (process.env.PORT || 5000))
 app.set('views', path.join(__dirname, 'views'))
-app.set('views', './views')
 app.set('view engine', 'pug')
 app.use(express.static(path.join(__dirname, 'public')))
 
@@ -25,8 +24,9 @@ app.post('/', urlencodedParser, function (req, res) {
         url: 'https://eatstreet.com/publicapi/v1/restaurant/search',
         qs: {
             'access-token': process.env.EATSTREET_KEY, // Uses API key in Heroku config vars
+            // 'access-token': '', // Uses API key in config file
             'street-address': req.body['street-address'],
-            method: 'both',
+            'method': 'both',
             'pickup-radius': '1'
 
             // latitude: '42.350498',
@@ -37,10 +37,10 @@ app.post('/', urlencodedParser, function (req, res) {
     request(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var info = JSON.parse(body);
-            var res_html = "<p>"; //build here and send in one res.send()
+            var res_html = [] //build here and send in one res.send()
             
             for (i = 0; i < info.restaurants.length; ++i) {
-                res_html += info.restaurants[i].name + '<br>';
+                res_html.push(info.restaurants[i].name)
                 
                 //TODO: get restaurant id via info.apiKey, then use that id in the following url to get the menu:
                 //https://eatstreet.com/publicapi/v1/restaurant/[apiKey]/menu
@@ -51,7 +51,6 @@ app.post('/', urlencodedParser, function (req, res) {
                 //also when printing please use indents or some other way to indicate that this menu belongs to the given restaurant, so that it is not one long list of restaurants and menu items
             }
 
-            res_html += "</p>"
             res.render('index-result', { data: res_html })
         } 
         else { res.render('index-result') }
