@@ -28,19 +28,16 @@ app.post('/', urlencodedParser, function (req, res) {
             'street-address': req.body['street-address'],
             'method': 'both',
             'pickup-radius': '1'
-
-            // latitude: '42.350498',
-            // longitude: '-71.105400',
         }
     }
     
     request(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var info = JSON.parse(body);
-            var res_html = [] //build here and send in one res.send()
+            var rest_names = [] //build here and send in one res.send()
             
             for (i = 0; i < info.restaurants.length; ++i) {
-                res_html.push(info.restaurants[i].name)
+                rest_names.push(info.restaurants[i].name)
                 
                 //TODO: get restaurant id via info.apiKey, then use that id in the following url to get the menu:
                 //https://eatstreet.com/publicapi/v1/restaurant/[apiKey]/menu
@@ -51,9 +48,9 @@ app.post('/', urlencodedParser, function (req, res) {
                 //also when printing please use indents or some other way to indicate that this menu belongs to the given restaurant, so that it is not one long list of restaurants and menu items
             }
 
-            res.render('index-result', { data: res_html })
+            res.render('index-result', { data: rest_names })
         } 
-        else { res.render('index-result') }
+        else { res.render('index-result', { data: [] }) }
     })
 })
 

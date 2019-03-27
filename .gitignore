@@ -3,3 +3,6 @@ node_modules
 
 # Ignore '.idea' folder
 .idea/*
+
+# Ignore 'config' folder
+config
