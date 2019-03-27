@@ -3,8 +3,10 @@ const request = require('request')
 const path = require("path")
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
 const app = express()
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 app.set('port', (process.env.PORT || 5000))
 app.set('views', path.join(__dirname, 'views'))
@@ -24,7 +26,6 @@ app.post('/', urlencodedParser, function (req, res) {
         url: 'https://eatstreet.com/publicapi/v1/restaurant/search',
         qs: {
             'access-token': process.env.EATSTREET_KEY, // Uses API key in Heroku config vars
-            // 'access-token': '', // Uses API key in config file
             'street-address': req.body['street-address'],
             'method': 'both',
             'pickup-radius': '1'
