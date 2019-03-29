@@ -17,8 +17,13 @@ html
 
       <div class="container">
         <ul>
-          each item in data
-            li= item 
+          each item in restaurants
+            li= item
+            <ul>
+              each menuitem in menu
+                each subitem in menuitem
+                  li= subitem
+            </ul>
         </ul>
       </div>
     </div>

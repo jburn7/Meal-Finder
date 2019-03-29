@@ -21,11 +21,13 @@
   },
   "homepage": "https://github.com/cs411dreamteam/final-project#readme",
   "dependencies": {
+    "async": "^2.6.2",
     "body-parser": "^1.18.3",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
     "pug": "^2.0.3",
     "request": "^2.88.0",
+    "request-promise-lite": "^0.15.0",
     "xmlhttprequest": "^1.8.0"
   }
 }
