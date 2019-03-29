@@ -30,7 +30,7 @@ app.post('/', urlencodedParser, function (req, res) {
                 method: 'GET',
                 url: 'https://eatstreet.com/publicapi/v1/restaurant/search',
                 qs: {
-                    'access-token': process.env.EATSTREET_KEY, // Uses API key in Heroku config vars
+                    'access-token': process.env.EATSTREET_KEY,
                     'street-address': req.body['street-address'],
                     'method': 'both',
                     'pickup-radius': '1'
@@ -44,12 +44,9 @@ app.post('/', urlencodedParser, function (req, res) {
                     request.get(options, function (error, response, body) {
                         if (!error && response.statusCode == 200) {
                             info = JSON.parse(body);
-                            // for(j = 0; j < info.length; ++j){
-                            //     restaurants.push(info[i].name);
-                            // }
                             resolve(info)
                         } else {
-                            reject()
+                            reject();
                         }
                     })
                 })
@@ -86,6 +83,15 @@ app.post('/', urlencodedParser, function (req, res) {
                     request.get(options, function (error, response, body) {
                         if (!error && response.statusCode == 200) {
                             const info = JSON.parse(body);
+                            
+                            
+                            //TODO: need to keep track of the highest rated meal throughout every request, and keep track of its
+                            //TODO: corresponding restaurant. we don't need to store every single meal into a giant array, just keep track
+                            //TODO: of the leading one
+                            //TODO: in the following loop, for every single meal item, we need to access the edamame API and find the nutrition
+                            //TODO: for that meal. If its nutrition better matches the user's parameters, then store it and remove the old best meal
+                            
+                            
                             var category = [];
                             for(i = 0; i < info.length; ++i) {
                                 var foodItems = [];
@@ -97,6 +103,9 @@ app.post('/', urlencodedParser, function (req, res) {
                             menus.push(category);
                             resolve();
                         }
+                        else {
+                            reject();
+                        }
                     })
                 })
             }
@@ -105,9 +114,7 @@ app.post('/', urlencodedParser, function (req, res) {
             
             let menuPromisesDebug = [menuPromises[0], menuPromises[1]];
             
-            //TODO: runs in parallel and so the menu generated is not necessarily tied to a specific restaurant
-            //TODO: need to make the getMenu() part run sequentially
-            
+            //TODO: send the callback function the top meal and the restaurant corresponding to that top meal, not an array of every single meal
             Promise.all(menuPromisesDebug).then(() =>
                 callback(null, rest_names, menus)).catch(
                     function(error){console.log(error)
