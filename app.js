@@ -22,7 +22,7 @@ app.get('/', function (req, res) {
 //removes all non a-Z and space characters
 const removeSpecialCharacters = function(str)
 {
-    for(i = 0; i < str.length; ++i)
+    for(var i = 0; i < str.length; ++i)
     {
         if(i >= str.length)
         {
@@ -80,6 +80,9 @@ app.post('/', urlencodedParser, function (req, res) {
         })
     }
     
+    //TODO: edamam limits connections to 10 per minute, so our options are:
+    //1) find a new api with greater bandwidth
+    //2) do some strong filtering to each restaurant's menu on the backend so that we only send 10 meals to edamam per user search
     const getNutritionOfMeal = function(mealName){
         return new Promise(function(resolve, reject){
             var options = {
@@ -98,7 +101,7 @@ app.post('/', urlencodedParser, function (req, res) {
                     var info = JSON.parse(body);
     
                     //determine the nutrition based on the top 'generic meal' category in the json body from Edamam
-                    for (i = 0; i < info.hints.length; ++i) {
+                    for (var i = 0; i < info.hints.length; ++i) {
                         if (info.hints[i].category == 'Generic meals') {
                             resolve(info.hints[i].food.nutrients);
                         }
@@ -122,7 +125,7 @@ app.post('/', urlencodedParser, function (req, res) {
             var topRest = {}
             var rest_keys = [];
             var rest_names = [];
-            for(i = 0; i < restJSON.restaurants.length; ++i){
+            for(var i = 0; i < restJSON.restaurants.length; ++i){
                 rest_keys.push({'restKey': restJSON.restaurants[i].apiKey, 'restIndex': i});
                 rest_names.push(restJSON.restaurants[i].name);
             }
@@ -141,25 +144,20 @@ app.post('/', urlencodedParser, function (req, res) {
                     
                     var id;
                     
-                    //TODO: fix crashing. maybe need to find a new architecture for setting the timeout
-                    
-                    //const timedGetMenu = function() {
+                    //TODO: validate that this function is actually being called no more than 10 times per second
+                    const timedGetMenu = function() {
                         request.get(options, function (error, response, body) {
                             if (!error && response.statusCode == 200) {
                                 const info = JSON.parse(body);
                                 
-                                for (i = 0; i < info.length; ++i) {
+                                var i = 0;
+                                for (i; i < info.length; i++) {
+                                    //console.log(i)
                                     //console.log(info[i])
-                                    if(typeof info === 'undefined' || typeof info[i] === 'undefined')
-                                    {
-                                        console.log("undef")
-                                    }
-                                    
-                                    else {
-                                        console.log(i)
-                                        console.log(info[i])
-                                        for (j = 0; j < info[i].items.length; ++j) {
+                                    try {
+                                        for (var j = 0; j < info[i].items.length; j++) {
                                             if (info[i].items[j].basePrice < userPriceLimit) {
+                                                //TODO: discard menu item if it doesn't somewhat match the user's food type
                                                 let nutritionPromise = getNutritionOfMeal(removeSpecialCharacters(info[i].items[j].name));
                                                 nutritionPromise.then(function (currFood) {
                                                     //if currFood > topFood for whatever value we're sorting by
@@ -171,6 +169,10 @@ app.post('/', urlencodedParser, function (req, res) {
                                                     })
                                             }
                                         }
+                                    }
+                                    catch(error)
+                                    {
+                                        console.log(error)
                                     }
                                 }
                                 
@@ -187,9 +189,9 @@ app.post('/', urlencodedParser, function (req, res) {
                                 }
                             }
                         })
-                    //}
+                    }
                     
-                    //id = setInterval(timedGetMenu, 100);
+                    id = setInterval(timedGetMenu, 100);
                 })
             }
             
@@ -197,7 +199,7 @@ app.post('/', urlencodedParser, function (req, res) {
             
             let menuPromisesDebug = [menuPromises[0], menuPromises[1]];
             
-            //TODO: send the callback function the top meal and the restaurant corresponding to that top meal, not an array of every single meal
+            
             Promise.all(menuPromisesDebug).then(() =>
                 callback(null, topFood, topRest)).catch(
                     function(error){console.log(error)
