@@ -19,8 +19,31 @@ app.get('/', function (req, res) {
     res.render('index')
 })
 
+//removes all non a-Z and space characters
+const removeSpecialCharacters = function(str)
+{
+    for(i = 0; i < str.length; ++i)
+    {
+        if(i >= str.length)
+        {
+            break;
+        }
+        if(!(str[i] >= "a" && str[i] <= "Z" && str[i] == " "))
+        {
+            str = str.substr(0, i) + str.substr(i + 1);
+        }
+    }
+    
+    return str;
+}
+
 app.post('/', urlencodedParser, function (req, res) {
     // TODO: validate POST data to check for errors
+    
+    //TODO: add more forms for user to set radius, price limit, sort category, etc
+    //DEBUG
+    const userRadius = 1
+    const userPriceLimit = 15
     
     //async attempt to load menus
     
@@ -33,11 +56,10 @@ app.post('/', urlencodedParser, function (req, res) {
                     'access-token': process.env.EATSTREET_KEY,
                     'street-address': req.body['street-address'],
                     'method': 'both',
-                    'pickup-radius': '1'
+                    'pickup-radius': userRadius
                 }
             }
             
-            var restaurants = [];
             var info;
             let getRestJSON = function() {
                 return new Promise(function (resolve, reject) {
@@ -46,67 +68,128 @@ app.post('/', urlencodedParser, function (req, res) {
                             info = JSON.parse(body);
                             resolve(info)
                         } else {
-                            reject();
+                            reject("bad response for getting restaurant");
                         }
                     })
                 })
             }
             
-            Promise.resolve(getRestJSON()).then(() => callback(null, info))
+            Promise.resolve(getRestJSON()).then(() => callback(null, info)).catch(
+                function(error){console.log(error)
+                })
+        })
+    }
+    
+    const getNutritionOfMeal = function(mealName){
+        return new Promise(function(resolve, reject){
+            var options = {
+                method: 'GET',
+                url: 'https://api.edamam.com/api/food-database/parser',
+                qs:
+                    {
+                        app_id: process.env.EDAMAM_APP_ID,
+                        app_key: process.env.EDAMAM_APP_KEY,
+                        ingr: encodeURIComponent(mealName)
+                    }
+            }
+    
+            request(options, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    var info = JSON.parse(body);
+    
+                    //determine the nutrition based on the top 'generic meal' category in the json body from Edamam
+                    for (i = 0; i < info.hints.length; ++i) {
+                        if (info.hints[i].category == 'Generic meals') {
+                            resolve(info.hints[i].food.nutrients);
+                        }
+                    }
+                    
+                    reject("no meals");
+                }
+                
+                //no meals were returned
+                else {
+                    reject("bad response when getting edamam nutrition");
+                }
+            });
         })
     }
     
     const getRestMenus = function(restJSON, callback){
         return new Promise(function(resolve, reject){
         
+            var topFood = {}
+            var topRest = {}
             var rest_keys = [];
             var rest_names = [];
             for(i = 0; i < restJSON.restaurants.length; ++i){
-                rest_keys.push(restJSON.restaurants[i].apiKey);
+                rest_keys.push({'restKey': restJSON.restaurants[i].apiKey, 'restIndex': i});
                 rest_names.push(restJSON.restaurants[i].name);
             }
-            
-            var menus = [[[]]];
             
             let getMenu = function(restaurant) {
                 return new Promise(function(resolve, reject)
                 {
                     var options = {
                         method: 'GET',
-                        url: 'https://eatstreet.com/publicapi/v1/restaurant/' + restaurant + '/menu',
+                        url: 'https://eatstreet.com/publicapi/v1/restaurant/' + restaurant.restKey + '/menu',
                         qs: {
                             'access-token': process.env.EATSTREET_KEY,
-                            'apiKey': restaurant
+                            'apiKey': restaurant.restKey
                         }
                     }
-        
-                    request.get(options, function (error, response, body) {
-                        if (!error && response.statusCode == 200) {
-                            const info = JSON.parse(body);
-                            
-                            
-                            //TODO: need to keep track of the highest rated meal throughout every request, and keep track of its
-                            //TODO: corresponding restaurant. we don't need to store every single meal into a giant array, just keep track
-                            //TODO: of the leading one
-                            //TODO: in the following loop, for every single meal item, we need to access the edamame API and find the nutrition
-                            //TODO: for that meal. If its nutrition better matches the user's parameters, then store it and remove the old best meal
-                            
-                            
-                            var category = [];
-                            for(i = 0; i < info.length; ++i) {
-                                var foodItems = [];
-                                for(j = 0; j < info[i].items.length; ++j){
-                                    foodItems.push(info[i].items[j].name);
+                    
+                    var id;
+                    
+                    //TODO: fix crashing. maybe need to find a new architecture for setting the timeout
+                    
+                    //const timedGetMenu = function() {
+                        request.get(options, function (error, response, body) {
+                            if (!error && response.statusCode == 200) {
+                                const info = JSON.parse(body);
+                                
+                                for (i = 0; i < info.length; ++i) {
+                                    //console.log(info[i])
+                                    if(typeof info === 'undefined' || typeof info[i] === 'undefined')
+                                    {
+                                        console.log("undef")
+                                    }
+                                    
+                                    else {
+                                        console.log(i)
+                                        console.log(info[i])
+                                        for (j = 0; j < info[i].items.length; ++j) {
+                                            if (info[i].items[j].basePrice < userPriceLimit) {
+                                                let nutritionPromise = getNutritionOfMeal(removeSpecialCharacters(info[i].items[j].name));
+                                                nutritionPromise.then(function (currFood) {
+                                                    //if currFood > topFood for whatever value we're sorting by
+                                                    //topFood = currFood
+                                                    //topRest = restaurant.restIndex
+                                                }).catch(
+                                                    function (error) {
+                                                        console.log(error)
+                                                    })
+                                            }
+                                        }
+                                    }
                                 }
-                                category.push(foodItems);
+                                
+                                clearInterval(id)
+                                resolve();
+                            } else {
+                                if (response.statusCode != 429) //429 = too many requests per second, so just wait
+                                {
+                                    clearInterval(id)
+                                    reject("bad response when getting menu");
+                                }
+                                else {
+                                    console.log("waiting");
+                                }
                             }
-                            menus.push(category);
-                            resolve();
-                        }
-                        else {
-                            reject();
-                        }
-                    })
+                        })
+                    //}
+                    
+                    //id = setInterval(timedGetMenu, 100);
                 })
             }
             
@@ -116,120 +199,20 @@ app.post('/', urlencodedParser, function (req, res) {
             
             //TODO: send the callback function the top meal and the restaurant corresponding to that top meal, not an array of every single meal
             Promise.all(menuPromisesDebug).then(() =>
-                callback(null, rest_names, menus)).catch(
+                callback(null, topFood, topRest)).catch(
                     function(error){console.log(error)
                 })
         })
     }
     
-    async.waterfall([getRestNames, getRestMenus], function renderResult(error, restNames, restMenus){
+    async.waterfall([getRestNames, getRestMenus], function renderResult(error, topFood, topRest){
         if (error) {
             res.render('index-result', {result: 'Error processing'})
         }
         else {
-            res.render('index-result', {restaurants: restNames, menu: restMenus})
+            res.render('index-result', {menuItem: topFood, restaurant: topRest})
         }
     })
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    //can generate via Postman or just by looking at the API's documentation
-    // var options = {
-    //     method: 'GET',
-    //     url: 'https://eatstreet.com/publicapi/v1/restaurant/search',
-    //     qs: {
-    //         'access-token': process.env.EATSTREET_KEY, // Uses API key in Heroku config vars
-    //         'street-address': req.body['street-address'],
-    //         'method': 'both',
-    //         'pickup-radius': '1'
-    //     }
-    // }
-    //
-    // var rest_keys = [];
-    // var rest_names = [] //build here and send in one res.send()
-    // var rest_menu =[];
-    // request.get(options, function (error, response, body) {
-    //     if (!error && response.statusCode == 200) {
-    //         var info = JSON.parse(body);
-    //
-    //         for (i = 0; i < info.restaurants.length; ++i) {
-    //             rest_names.push(info.restaurants[i].name);
-    //             rest_keys.push(info.restaurants[i].apiKey);
-    //
-    //             // var options2 = {
-    //             //     method: 'GET',
-    //             //     url: 'https://eatstreet.com/publicapi/v1/restaurant/' +rest_apikeys + '/menu',
-    //             //     qs: {
-    //             //         'access-token': "e2756e10b82df4c3", //process.env.EATSTREET_KEY,
-    //             //         'apiKey': rest_apikeys
-    //             //     }
-    //             // }
-    //
-    //             //rest_menu += debug(options2);
-    //             //TODO: get restaurant id via info.apiKey, then use that id in the following url to get the menu:
-    //             //https://eatstreet.com/publicapi/v1/restaurant/[apiKey]/menu
-    //             //so you will need to create a new request() where options just contains the following JSON entries:
-    //             //method: 'GET', url: //https://eatstreet.com/publicapi/v1/restaurant/[apiKey]/menu
-    //
-    //             //then add the menu's contents to res_html
-    //             //also when printing please use indents or some other way to indicate that this menu belongs to the given restaurant, so that it is not one long list of restaurants and menu item
-    //
-    //         }
-    //
-    //
-    //
-    //         //res.render('index-result', { data: rest_names, menu: rest_menu});
-    //
-    //         // for (i = 0; i < info.restaurants.length; ++i) {
-    //         //     rest_names.push(info.restaurants[i].name)
-    //         //
-    //         //     //TODO: get restaurant id via info.apiKey, then use that id in the following url to get the menu:
-    //         //     //https://eatstreet.com/publicapi/v1/restaurant/[apiKey]/menu
-    //         //     //so you will need to create a new request() where options just contains the following JSON entries:
-    //         //     //method: 'GET', url: //https://eatstreet.com/publicapi/v1/restaurant/[apiKey]/menu
-    //         //
-    //         //     //then add the menu's contents to res_html
-    //         //     //also when printing please use indents or some other way to indicate that this menu belongs to the given restaurant, so that it is not one long list of restaurants and menu items
-    //         //
-    //         // }
-    //         //
-    //         // res.render('index-result', { data: rest_names })
-    //     }
-    //     else { res.render('index-result', { data: [] }); return; }
-    // })
-    //
-    // for(i = 0; i < rest_keys.length; ++i) {
-    //     options = {
-    //         method: 'GET',
-    //         url: 'https://eatstreet.com/publicapi/v1/restaurant/' + rest_keys[i] + '/menu',
-    //         qs: {
-    //             'access-token': process.env.EATSTREET_KEY,
-    //             'apiKey': rest_keys[i]
-    //         }
-    //     }
-    //
-    //     request(options, function (error, response, body) {
-    //         if (!error && response.statusCode == 200) {
-    //             var infomenu = JSON.parse(body);
-    //             //build here and send in one res.send()
-    //
-    //             for (k = 0; k < infomenu[0].items.length; ++k) {
-    //                 rest_menu.push(infomenu[0].items[k].name);
-    //             }
-    //         }
-    //
-    //     })
-    // }
-    //
-    // res.render('index-result', { data: rest_names, menu: rest_menu});
 })
 
 app.listen(app.get('port'), function () {
