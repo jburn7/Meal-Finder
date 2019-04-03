@@ -107,7 +107,8 @@ app.post('/', urlencodedParser, function (req, res) {
                         }
                     }
                     
-                    reject("no meals");
+                    console.log("no meals")
+                    reject({}); //return an empty JSON object, so caller will have to check if response is valid before accessing elements
                 }
                 
                 //no meals were returned
@@ -130,80 +131,82 @@ app.post('/', urlencodedParser, function (req, res) {
                 rest_names.push(restJSON.restaurants[i].name);
             }
             
-            let getMenu = function(restaurant) {
-                return new Promise(function(resolve, reject)
-                {
-                    var options = {
-                        method: 'GET',
-                        url: 'https://eatstreet.com/publicapi/v1/restaurant/' + restaurant.restKey + '/menu',
-                        qs: {
-                            'access-token': process.env.EATSTREET_KEY,
-                            'apiKey': restaurant.restKey
-                        }
-                    }
-                    
-                    var id;
-                    
-                    //TODO: validate that this function is actually being called no more than 10 times per second
-                    const timedGetMenu = function() {
-                        request.get(options, function (error, response, body) {
-                            if (!error && response.statusCode == 200) {
-                                const info = JSON.parse(body);
-                                
-                                var i = 0;
-                                for (i; i < info.length; i++) {
-                                    //console.log(i)
-                                    //console.log(info[i])
-                                    try {
-                                        for (var j = 0; j < info[i].items.length; j++) {
-                                            if (info[i].items[j].basePrice < userPriceLimit) {
-                                                //TODO: discard menu item if it doesn't somewhat match the user's food type
-                                                let nutritionPromise = getNutritionOfMeal(removeSpecialCharacters(info[i].items[j].name));
-                                                nutritionPromise.then(function (currFood) {
-                                                    //if currFood > topFood for whatever value we're sorting by
-                                                    //topFood = currFood
-                                                    //topRest = restaurant.restIndex
-                                                }).catch(
-                                                    function (error) {
-                                                        console.log(error)
-                                                    })
-                                            }
-                                        }
-                                    }
-                                    catch(error)
-                                    {
-                                        console.log(error)
-                                    }
-                                }
-                                
-                                clearInterval(id)
-                                resolve();
-                            } else {
-                                if (response.statusCode != 429) //429 = too many requests per second, so just wait
-                                {
-                                    clearInterval(id)
-                                    reject("bad response when getting menu");
-                                }
-                                else {
-                                    console.log("waiting");
-                                }
-                            }
-                        })
-                    }
-                    
-                    id = setInterval(timedGetMenu, 100);
-                })
+            let pollMenusForFood = function(restaurants)
+            {
+	            return new Promise(function(resolve, reject)
+	            {
+	            	var id;
+	            	let interval = function()
+		            {
+		            	if(restaurants.length === 0)
+			            {
+				            clearInterval(id)
+				            resolve();
+			            }
+		            	else {
+				            const thisRest = restaurants.pop();
+				            var options = {
+					            method: 'GET',
+					            url: 'https://eatstreet.com/publicapi/v1/restaurant/' + thisRest.restKey + '/menu',
+					            qs: {
+						            'access-token': process.env.EATSTREET_KEY,
+						            'apiKey': thisRest.restKey
+					            }
+				            }
+				            
+				            request.get(options, function (error, response, body)
+				            {
+					            if (!error && response.statusCode == 200) {
+						            const info = JSON.parse(body);
+						
+						            for (var i = 0; i < info.length; i++) {
+							            try {
+								            for (var j = 0; j < info[i].items.length; j++) {
+									            if (info[i].items[j].basePrice < userPriceLimit) {
+										            //TODO: discard menu item if it doesn't somewhat match the user's food type
+										            //TODO: limit this call to 10 meals or fewer to conform to Edamam bottleneck
+										            let nutritionPromise = getNutritionOfMeal(removeSpecialCharacters(info[i].items[j].name));
+										            nutritionPromise.then(function (currFood)
+										            {
+										            	//TODO: actually keep track of and compare foods
+											            //if currFood > topFood for whatever value we're sorting by
+											            //topFood = currFood
+											            //topRest = restaurant.restIndex
+										            }).catch(
+											            function (error)
+											            {
+												            console.log(error)
+											            })
+									            }
+								            }
+							            } catch (error) {
+								            console.log(error)
+							            }
+						            }
+					            } else {
+						            if (response.statusCode != 429) //429 = too many requests per second, this should not be happening
+						            {
+							            reject("bad response when getting menu");
+						            } else {
+							            console.log("too many reqs per second for Eat Street API");
+						            }
+					            }
+				            })
+			            }
+		            }
+		            
+		            //cap at 10 requests per second
+		            id = setInterval(interval, 100);
+	            })
             }
             
-            let menuPromises = rest_keys.map(getMenu);
-            
-            let menuPromisesDebug = [menuPromises[0], menuPromises[1]];
-            
-            
-            Promise.all(menuPromisesDebug).then(() =>
-                callback(null, topFood, topRest)).catch(
-                    function(error){console.log(error)
-                })
+            var rest_keysDebug = [rest_keys[0], rest_keys[1]];
+	        
+	        let menuPromise = pollMenusForFood(rest_keysDebug);
+	        Promise.resolve(menuPromise).then(() =>
+		        callback(null, topFood, topRest)).catch(
+		        function(error){console.log(error)
+		        })
         })
     }
     
