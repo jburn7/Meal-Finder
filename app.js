@@ -220,6 +220,9 @@ app.post('/', urlencodedParser, function (req, res) {
     })
 })
 
+app.post('/login', passport.authenticate('local', { successRedirect: '/',
+                                                    failureRedirect: '/login' }))
+
 app.listen(app.get('port'), function () {
     console.log('Node app running at localhost:' + app.get('port'))
 })
