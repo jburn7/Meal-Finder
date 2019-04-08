@@ -29,12 +29,18 @@ html(language=en)
 
     <div class="container">
       h1 CS 411 Prototype
-      p Enter your zip code below
+      p Enter search parameters below. Only supports max calories
 
       <form method="POST" action="/">
-        <input type="text" name="street-address">
+        <input type="text" placeholder="address or zip code" name="street-address">
+        <input type="text" placeholder="meal ingredients" name="meal">
+        <input type="text" placeholder="radius (miles)" name="radius">
+        <input type="text" placeholder="price limit" name="price">
         <input type="submit" value="Submit">
       </form>
+
+    p Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]
+    img(src="images/edamam_logo.jpg")
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
