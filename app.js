@@ -220,6 +220,14 @@ app.post('/', urlencodedParser, function (req, res) {
     })
 })
 
+app.get('/login', function (req, res) {
+    res.render('login')
+})
+
+app.get('/register', function (req, res) {
+    res.render('register')
+})
+
 app.listen(app.get('port'), function () {
     console.log('Node app running at localhost:' + app.get('port'))
 })
