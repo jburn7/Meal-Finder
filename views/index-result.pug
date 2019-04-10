@@ -9,21 +9,43 @@ html(language=en)
     
     title CS411 App
   body
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">CS411</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+        </ul>
+        <a href="/login">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="button">Log In</button> 
+        </a>
+        <a href="/register" style="margin-left: 1%">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="button" style="margin-left: 1%">Register</button> 
+        </a>
+      </div>
+    </nav>
+
     <div class="container">
       h1 CS 411 Prototype
-      <a href="https://www.edamam.com/">here</a>
-      p Enter your zip code below
 
-      <form method="POST" action="/">
-        <input type="text" name="street-address">
-        <input type="submit" value="Submit">
-      </form>
+    <form method="POST" action="/">
+      <input type="text" placeholder="address or zip code" name="street-address">
+      <input type="text" placeholder="meal ingredients" name="meal">
+      <input type="text" placeholder="radius (miles)" name="radius">
+      <input type="text" placeholder="price limit" name="price">
+      <input type="submit" value="Submit">
+    </form>
 
       p Here is the best food that suits your needs
       <div class="container">
-        menuItem </br>
-        restaurant
+        p #{menuItem.name} </br>
+        p #{restaurant.name}
       </div>
+
+    p Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]
+    img(src="images/edamam_logo.jpg")
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

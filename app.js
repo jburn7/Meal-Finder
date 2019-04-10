@@ -7,6 +7,7 @@ const app = express()
 const dotenv = require('dotenv')
 const request_promise = require('request-promise-lite')
 const async = require('async')
+const MongoClient = require('mongodb').MongoClient
 
 dotenv.config();
 
@@ -17,35 +18,34 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.get('/', function (req, res) {
     res.render('index')
+
+    // Testing will remove later, connects to MongoDB Atlas and inserts a document
+    const uri = "mongodb+srv://" + process.env.MONGO_USERNAME + ":" + process.env.MONGO_PASSWORD + "@cs411-vrnjt.mongodb.net/test?retryWrites=true"
+    const client = new MongoClient(uri, { useNewUrlParser: true })
+    client.connect(err => {
+        const collection = client.db("test").collection("devices");
+        // perform actions on the collection object
+        collection.insertOne({ connectSuccess: 'Success!', connectTime: Date() });
+        client.close();
+    });
 })
 
 //removes all non a-Z and space characters
 const removeSpecialCharacters = function(str)
 {
-    for(var i = 0; i < str.length; ++i)
-    {
-        if(i >= str.length)
-        {
-            break;
-        }
-        if(!(str[i] >= "a" && str[i] <= "Z" && str[i] == " "))
-        {
-            str = str.substr(0, i) + str.substr(i + 1);
-        }
-    }
-    
-    return str;
+	const s = str.replace(/[^a-zA-Z ]/g, '');
+	return s
 }
 
 app.post('/', urlencodedParser, function (req, res) {
     // TODO: validate POST data to check for errors
-    
-    //TODO: add more forms for user to set radius, price limit, sort category, etc
-    //DEBUG
-    const userRadius = 1
-    const userPriceLimit = 15
-    
-    //async attempt to load menus
+    const userRadius = req.body['radius']
+    const userPriceLimit = req.body['price']
+	const userSearchString = req.body['meal']
+	const userSearchWords = userSearchString.toLowerCase().split(" ");
+	
+	var topFood = {ENERC_KCAL: 0}
+	var topRest = {}
     
     const getRestNames = function(callback){
         return new Promise(function(resolve, reject){
@@ -80,10 +80,7 @@ app.post('/', urlencodedParser, function (req, res) {
         })
     }
     
-    //TODO: edamam limits connections to 10 per minute, so our options are:
-    //1) find a new api with greater bandwidth
-    //2) do some strong filtering to each restaurant's menu on the backend so that we only send 10 meals to edamam per user search
-    const getNutritionOfMeal = function(mealName){
+    const getNutritionOfMeal = function(mealName, rest, restJSON){
         return new Promise(function(resolve, reject){
             var options = {
                 method: 'GET',
@@ -102,16 +99,24 @@ app.post('/', urlencodedParser, function (req, res) {
     
                     //determine the nutrition based on the top 'generic meal' category in the json body from Edamam
                     for (var i = 0; i < info.hints.length; ++i) {
-                        if (info.hints[i].category == 'Generic meals') {
+                        if (info.hints[i].food.category === "Generic meals") {
+                        	let currFood = info.hints[i].food.nutrients;
+	                        if(currFood != {})
+	                        {
+		                        if (currFood.ENERC_KCAL > topFood.ENERC_KCAL) {
+			                        topFood = currFood;
+			                        topFood["name"] = mealName;
+			                        topRest = restJSON.restaurants[rest.restIndex];
+		                        }
+	                        }
                             resolve(info.hints[i].food.nutrients);
                         }
                     }
                     
                     console.log("no meals")
-                    reject({}); //return an empty JSON object, so caller will have to check if response is valid before accessing elements
+                    resolve({}); //return an empty JSON object, so caller will have to check if response is valid before accessing elements
                 }
                 
-                //no meals were returned
                 else {
                     reject("bad response when getting edamam nutrition");
                 }
@@ -119,16 +124,75 @@ app.post('/', urlencodedParser, function (req, res) {
         })
     }
     
+    const foodMatchesSearch = function(foodJSON)
+	{
+		const foodNameWords = (foodJSON.name + foodJSON.description).toLowerCase().split(" ");
+		//TODO: make this function return a number which represents how much the food matches the search, instead of just a boolean, so
+		// that we can sort them later on
+		//for each word in name/description
+			//for each word in user search
+				//if food word == user search word
+					//return true
+		for(var i = 0; i < foodNameWords.length; i++)
+		{
+			for(var j = 0; j < userSearchWords.length; j++)
+			{
+				if(foodNameWords[i] == userSearchWords[j])
+				{
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+    
     const getRestMenus = function(restJSON, callback){
         return new Promise(function(resolve, reject){
-        
-            var topFood = {}
-            var topRest = {}
+        	
             var rest_keys = [];
             var rest_names = [];
             for(var i = 0; i < restJSON.restaurants.length; ++i){
                 rest_keys.push({'restKey': restJSON.restaurants[i].apiKey, 'restIndex': i});
                 rest_names.push(restJSON.restaurants[i].name);
+            }
+	
+            //cap the number of calls to 100, which is Edamam's food database limit per minute
+	        //TODO: instead of taking the first 100 available meals, sort all of them by how strongly they match the user's search and
+	        // look up nutrition for only the top 100 matches
+	        var callsRemaining = 100;
+            var foodsToLookup = [];
+            
+            let addFoodsToMenu = function(options, thisRest)
+            {
+	            return new Promise(function(resolve, reject)
+	            {
+		            request.get(options, function (error, response, body)
+		            {
+			            if (!error && response.statusCode == 200) {
+				            const info = JSON.parse(body);
+				            
+				            for (var i = 0; i < info.length; i++) {
+					            for (var j = 0; j < info[i].items.length; j++) {
+						            if (callsRemaining > 0 && info[i].items[j].basePrice < userPriceLimit && foodMatchesSearch(info[i].items[j])) {
+							            callsRemaining--;
+							            let nutritionPromise = getNutritionOfMeal(removeSpecialCharacters(info[i].items[j].name), thisRest, restJSON);
+							            foodsToLookup.push(nutritionPromise)
+						            }
+					            }
+				            }
+				            
+				            resolve();
+			            } else {
+				            if (response.statusCode != 429) //429 = too many requests per second, this should not be happening
+				            {
+					            reject("bad response when getting menu");
+				            } else {
+					            console.log("too many reqs per second for Eat Street API");
+				            }
+			            }
+		            })
+	            })
             }
             
             let pollMenusForFood = function(restaurants)
@@ -140,8 +204,10 @@ app.post('/', urlencodedParser, function (req, res) {
 		            {
 		            	if(restaurants.length === 0)
 			            {
-				            clearInterval(id)
-				            resolve();
+				            clearInterval(id);
+				            Promise.all(foodsToLookup).then(() => {
+				            	resolve();
+				            })
 			            }
 		            	else {
 				            const thisRest = restaurants.pop();
@@ -154,44 +220,7 @@ app.post('/', urlencodedParser, function (req, res) {
 					            }
 				            }
 				            
-				            request.get(options, function (error, response, body)
-				            {
-					            if (!error && response.statusCode == 200) {
-						            const info = JSON.parse(body);
-						
-						            for (var i = 0; i < info.length; i++) {
-							            try {
-								            for (var j = 0; j < info[i].items.length; j++) {
-									            if (info[i].items[j].basePrice < userPriceLimit) {
-										            //TODO: discard menu item if it doesn't somewhat match the user's food type
-										            //TODO: limit this call to 10 meals or fewer to conform to Edamam bottleneck
-										            let nutritionPromise = getNutritionOfMeal(removeSpecialCharacters(info[i].items[j].name));
-										            nutritionPromise.then(function (currFood)
-										            {
-										            	//TODO: actually keep track of and compare foods
-											            //if currFood > topFood for whatever value we're sorting by
-											            //topFood = currFood
-											            //topRest = restaurant.restIndex
-										            }).catch(
-											            function (error)
-											            {
-												            console.log(error)
-											            })
-									            }
-								            }
-							            } catch (error) {
-								            console.log(error)
-							            }
-						            }
-					            } else {
-						            if (response.statusCode != 429) //429 = too many requests per second, this should not be happening
-						            {
-							            reject("bad response when getting menu");
-						            } else {
-							            console.log("too many reqs per second for Eat Street API");
-						            }
-					            }
-				            })
+				            Promise.resolve(addFoodsToMenu(options, thisRest));
 			            }
 		            }
 		            
@@ -202,7 +231,7 @@ app.post('/', urlencodedParser, function (req, res) {
             
             var rest_keysDebug = [rest_keys[0], rest_keys[1]];
 	        
-	        let menuPromise = pollMenusForFood(rest_keysDebug);
+	        let menuPromise = pollMenusForFood(rest_keys);
 	        Promise.resolve(menuPromise).then(() =>
 		        callback(null, topFood, topRest)).catch(
 		        function(error){console.log(error)
@@ -220,8 +249,13 @@ app.post('/', urlencodedParser, function (req, res) {
     })
 })
 
-app.post('/login', passport.authenticate('local', { successRedirect: '/',
-                                                    failureRedirect: '/login' }))
+app.get('/login', function (req, res) {
+    res.render('login')
+})
+
+app.get('/register', function (req, res) {
+    res.render('register')
+})
 
 app.listen(app.get('port'), function () {
     console.log('Node app running at localhost:' + app.get('port'))

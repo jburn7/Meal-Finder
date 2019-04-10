@@ -9,3 +9,4 @@ config
 
 #ignore .env file
 .env
+report.20190401.191518.1668.001.json
