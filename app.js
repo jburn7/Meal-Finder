@@ -4,17 +4,45 @@ const path = require("path")
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const app = express()
-const dotenv = require('dotenv')
+const dotenv = require('dotenv').config()
 const request_promise = require('request-promise-lite')
 const async = require('async')
 const MongoClient = require('mongodb').MongoClient
+const passport = require('passport')
+const GoogleStrategy = require('passport-google-oauth20').Strategy
 
-dotenv.config();
+// Configure Google strategy for Passport
+passport.use(new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: process.env.GOOGLE_CALLBACK_URL + '/auth/google/callback'
+    },
+    function(accessToken, refreshToken, profile, cb) {
+        // TODO: connect to database to find user record
+
+        // User.findOrCreate({ googleId: profile.id }, function (err, user) {
+        //     return cb(err, user)
+        // })
+        return cb(null, profile)
+    }
+))
+
+passport.serializeUser(function(user, cb) {
+    cb(null, user)
+})
+
+passport.deserializeUser(function(obj, cb) {
+    cb(null, obj)
+})
 
 app.set('port', (process.env.PORT || 5000))
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 app.use(express.static(path.join(__dirname, 'public')))
+
+// Initialize Passport and restore authentication state from session
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.get('/', function (req, res) {
     res.render('index')
@@ -251,6 +279,16 @@ app.post('/', urlencodedParser, function (req, res) {
 
 app.get('/login', function (req, res) {
     res.render('login')
+})
+
+app.get('/auth/google', 
+    passport.authenticate('google', { scope: ['profile'] }))
+
+app.get('/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    function(req, res) {
+        // Successful authentication, redirect home.
+        res.redirect('/')
 })
 
 app.get('/register', function (req, res) {
