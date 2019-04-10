@@ -291,6 +291,12 @@ app.get('/auth/google/callback',
         res.redirect('/')
 })
 
+app.get('/logout', function (req, res) {
+    req.logout()
+    console.log('User logged out')
+    res.redirect('/')
+})
+
 app.get('/register', function (req, res) {
     res.render('register')
 })
