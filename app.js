@@ -301,7 +301,7 @@ app.get('/register', function (req, res) {
 app.get('/profile', 
     require('connect-ensure-login').ensureLoggedIn(),
     function (req, res) {
-        res.render('register')
+        res.render('profile', { user: req.user })
 })
 
 app.listen(app.get('port'), function () {
