@@ -11,15 +11,18 @@ const MongoClient = require('mongodb').MongoClient
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 
+var session = require('express-session')
+
 // Configure Google strategy for Passport
 passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL + '/auth/google/callback'
+        callbackURL: process.env.GOOGLE_CALLBACK_URL + '/auth/google/callback',
+		passReqToCallback: true
     },
-    function(accessToken, refreshToken, profile, cb) {
+    function(req, accessToken, refreshToken, profile, cb) {
         // TODO: connect to database to find user record
-
+	    
         // User.findOrCreate({ googleId: profile.id }, function (err, user) {
         //     return cb(err, user)
         // })
@@ -39,6 +42,10 @@ app.set('port', (process.env.PORT || 5000))
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(session({
+	secret: 'keyboard cat',
+	resave: false,
+	saveUninitialized: true}))
 
 // Initialize Passport and restore authentication state from session
 app.use(passport.initialize())
@@ -273,6 +280,11 @@ app.post('/', urlencodedParser, function (req, res) {
         }
         else {
             res.render('index-result', {menuItem: topFood, restaurant: topRest})
+	        
+	        if(req.user)
+	        {
+	        //TODO: store this search into database at user if user is locgged in
+	        }
         }
     })
 })
@@ -288,6 +300,7 @@ app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/login' }),
     function(req, res) {
         // Successful authentication, redirect home.
+	    
         res.redirect('/')
 })
 
