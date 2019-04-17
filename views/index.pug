@@ -21,8 +21,8 @@ html(language=en)
         <a href="/login">
           <button class="btn btn-outline-success my-2 my-sm-0" type="button">Log In</button> 
         </a>
-        <a href="/register" style="margin-left: 1%">
-          <button class="btn btn-outline-success my-2 my-sm-0" type="button">Register</button> 
+        <a href="/profile" style="margin-left: 1%">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="button">Profile</button> 
         </a>
       </div>
     </nav>
@@ -32,6 +32,7 @@ html(language=en)
       p Enter search parameters below. Only supports max calories
 
       <form method="POST" action="/">
+        <input type="text" placeholder="debug 1 or 0" name="debug">
         <input type="text" placeholder="address or zip code" name="street-address">
         <input type="text" placeholder="meal ingredients" name="meal">
         <input type="text" placeholder="radius (miles)" name="radius">

@@ -11,18 +11,15 @@ const MongoClient = require('mongodb').MongoClient
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 
-var session = require('express-session')
-
 // Configure Google strategy for Passport
 passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL + '/auth/google/callback',
-		passReqToCallback: true
+        callbackURL: process.env.GOOGLE_CALLBACK_URL + '/auth/google/callback'
     },
-    function(req, accessToken, refreshToken, profile, cb) {
+    function(accessToken, refreshToken, profile, cb) {
         // TODO: connect to database to find user record
-	    
+
         // User.findOrCreate({ googleId: profile.id }, function (err, user) {
         //     return cb(err, user)
         // })
@@ -42,27 +39,44 @@ app.set('port', (process.env.PORT || 5000))
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(session({
-	secret: 'keyboard cat',
-	resave: false,
-	saveUninitialized: true}))
+app.use(require('express-session')({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 
 // Initialize Passport and restore authentication state from session
 app.use(passport.initialize())
 app.use(passport.session())
 
+//const dbURL = "mongodb://localhost:5000/test"
+const dbURL = "mongodb+srv://" + process.env.MONGO_USERNAME + ":" + process.env.MONGO_PASSWORD + "@cs411-vrnjt.mongodb.net/test?retryWrites=true"
+const client = new MongoClient(dbURL, { useNewUrlParser: true });
+const connection = client.connect().catch(function(error){
+	console.log(error);
+});
+
 app.get('/', function (req, res) {
     res.render('index')
 
     // Testing will remove later, connects to MongoDB Atlas and inserts a document
-    const uri = "mongodb+srv://" + process.env.MONGO_USERNAME + ":" + process.env.MONGO_PASSWORD + "@cs411-vrnjt.mongodb.net/test?retryWrites=true"
-    const client = new MongoClient(uri, { useNewUrlParser: true })
-    client.connect(err => {
-        const collection = client.db("test").collection("devices");
-        // perform actions on the collection object
-        collection.insertOne({ connectSuccess: 'Success!', connectTime: Date() });
-        client.close();
-    });
+    // const uri = "mongodb+srv://" + process.env.MONGO_USERNAME + ":" + process.env.MONGO_PASSWORD + "@cs411-vrnjt.mongodb.net/test?retryWrites=true"
+    // const client = new MongoClient(uri, { useNewUrlParser: true })
+    // client.connect(err => {
+    //     const collection = client.db("test").collection("devices");
+    //     // perform actions on the collection object
+    //     collection.insertOne({ connectSuccess: 'Success!', connectTime: Date() });
+    //     client.close();
+    // });
+	
+	let connect = connection
+	connect.then(() => {
+		var collection = client.db("test").collection("devices");
+		collection.find({test: 'Success'}).toArray((err, items) => {
+			console.log(items)
+		})
+		collection.insertOne({test: 'Success'}, (err, res) => {
+			if(err) throw err
+		})
+	}).catch(function(err) {
+		console.log(err)
+	})
 })
 
 //removes all non a-Z and space characters
@@ -74,9 +88,22 @@ const removeSpecialCharacters = function(str)
 
 app.post('/', urlencodedParser, function (req, res) {
     // TODO: validate POST data to check for errors
-    const userRadius = req.body['radius']
-    const userPriceLimit = req.body['price']
-	const userSearchString = req.body['meal']
+	const debug = req.body['debug']
+	let userRadius, userPriceLimit, userSearchString, searchAddress
+	if(debug)
+	{
+		userRadius = 1
+		userPriceLimit = 15
+		userSearchString = "chicken"
+		searchAddress = "02215"
+	}
+	else
+	{
+		userRadius = req.body['radius']
+		userPriceLimit = req.body['price']
+		userSearchString = req.body['meal']
+		searchAddress = req.body['street-address']
+	}
 	const userSearchWords = userSearchString.toLowerCase().split(" ");
 	
 	var topFood = {ENERC_KCAL: 0}
@@ -89,7 +116,7 @@ app.post('/', urlencodedParser, function (req, res) {
                 url: 'https://eatstreet.com/publicapi/v1/restaurant/search',
                 qs: {
                     'access-token': process.env.EATSTREET_KEY,
-                    'street-address': req.body['street-address'],
+                    'street-address': searchAddress,
                     'method': 'both',
                     'pickup-radius': userRadius
                 }
@@ -109,8 +136,8 @@ app.post('/', urlencodedParser, function (req, res) {
                 })
             }
             
-            Promise.resolve(getRestJSON()).then(() => callback(null, info)).catch(
-                function(error){console.log(error)
+            Promise.resolve(getRestJSON()).then(() => callback(null, info)).catch(function(error){
+                	console.log(error)
                 })
         })
     }
@@ -142,6 +169,12 @@ app.post('/', urlencodedParser, function (req, res) {
 			                        topFood = currFood;
 			                        topFood["name"] = mealName;
 			                        topRest = restJSON.restaurants[rest.restIndex];
+			                        
+			                        //if debug then just return the first food so we don't waste precious api calls
+			                        if(debug)
+			                        {
+			                        	break;
+			                        }
 		                        }
 	                        }
                             resolve(info.hints[i].food.nutrients);
@@ -266,7 +299,7 @@ app.post('/', urlencodedParser, function (req, res) {
             
             var rest_keysDebug = [rest_keys[0], rest_keys[1]];
 	        
-	        let menuPromise = pollMenusForFood(rest_keys);
+	        let menuPromise = pollMenusForFood(rest_keysDebug);
 	        Promise.resolve(menuPromise).then(() =>
 		        callback(null, topFood, topRest)).catch(
 		        function(error){console.log(error)
@@ -280,10 +313,20 @@ app.post('/', urlencodedParser, function (req, res) {
         }
         else {
             res.render('index-result', {menuItem: topFood, restaurant: topRest})
-	        
-	        if(req.user)
-	        {
-	        //TODO: store this search into database at user if user is locgged in
+	        if(req.user) {
+		        let connect = connection
+		        connect.then(() => {
+			        var collection = client.db("users").collection("searches");
+			        collection.insertOne({user: req.user,
+				            radius: userRadius,
+				            priceLimit: userPriceLimit,
+				            searchString: userSearchString,
+			                address: searchAddress}, (err, res) => {
+				        if (err) throw err
+			        })
+		        }).catch(function (err) {
+			        console.log(err)
+		        })
 	        }
         }
     })
@@ -297,12 +340,7 @@ app.get('/auth/google',
     passport.authenticate('google', { scope: ['profile'] }))
 
 app.get('/auth/google/callback', 
-    passport.authenticate('google', { failureRedirect: '/login' }),
-    function(req, res) {
-        // Successful authentication, redirect home.
-	    
-        res.redirect('/')
-})
+    passport.authenticate('google', { successReturnToOrRedirect: '/', failureRedirect: '/login' }))
 
 app.get('/logout', function (req, res) {
     req.logout()
@@ -312,6 +350,12 @@ app.get('/logout', function (req, res) {
 
 app.get('/register', function (req, res) {
     res.render('register')
+})
+
+app.get('/profile', 
+    require('connect-ensure-login').ensureLoggedIn(),
+    function (req, res) {
+        res.render('profile', { user: req.user })
 })
 
 app.listen(app.get('port'), function () {
