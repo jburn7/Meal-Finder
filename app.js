@@ -39,6 +39,7 @@ app.set('port', (process.env.PORT || 5000))
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(require('express-session')({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 
 // Initialize Passport and restore authentication state from session
 app.use(passport.initialize())
@@ -285,11 +286,7 @@ app.get('/auth/google',
     passport.authenticate('google', { scope: ['profile'] }))
 
 app.get('/auth/google/callback', 
-    passport.authenticate('google', { failureRedirect: '/login' }),
-    function(req, res) {
-        // Successful authentication, redirect home.
-        res.redirect('/')
-})
+    passport.authenticate('google', { successReturnToOrRedirect: '/', failureRedirect: '/login' }))
 
 app.get('/logout', function (req, res) {
     req.logout()
@@ -299,6 +296,12 @@ app.get('/logout', function (req, res) {
 
 app.get('/register', function (req, res) {
     res.render('register')
+})
+
+app.get('/profile', 
+    require('connect-ensure-login').ensureLoggedIn(),
+    function (req, res) {
+        res.render('register')
 })
 
 app.listen(app.get('port'), function () {
