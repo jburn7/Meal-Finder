@@ -18,11 +18,6 @@ passport.use(new GoogleStrategy({
         callbackURL: process.env.GOOGLE_CALLBACK_URL + '/auth/google/callback'
     },
     function(accessToken, refreshToken, profile, cb) {
-        // TODO: connect to database to find user record
-
-        // User.findOrCreate({ googleId: profile.id }, function (err, user) {
-        //     return cb(err, user)
-        // })
         return cb(null, profile)
     }
 ))
@@ -45,7 +40,6 @@ app.use(require('express-session')({ secret: process.env.SESSION_SECRET, resave:
 app.use(passport.initialize())
 app.use(passport.session())
 
-//const dbURL = "mongodb://localhost:5000/test"
 const dbURL = "mongodb+srv://" + process.env.MONGO_USERNAME + ":" + process.env.MONGO_PASSWORD + "@cs411-vrnjt.mongodb.net/test?retryWrites=true"
 const client = new MongoClient(dbURL, { useNewUrlParser: true });
 const connection = client.connect().catch(function(error){
@@ -54,29 +48,14 @@ const connection = client.connect().catch(function(error){
 
 app.get('/', function (req, res) {
     res.render('index')
-
-    // Testing will remove later, connects to MongoDB Atlas and inserts a document
-    // const uri = "mongodb+srv://" + process.env.MONGO_USERNAME + ":" + process.env.MONGO_PASSWORD + "@cs411-vrnjt.mongodb.net/test?retryWrites=true"
-    // const client = new MongoClient(uri, { useNewUrlParser: true })
-    // client.connect(err => {
-    //     const collection = client.db("test").collection("devices");
-    //     // perform actions on the collection object
-    //     collection.insertOne({ connectSuccess: 'Success!', connectTime: Date() });
-    //     client.close();
-    // });
 	
-	let connect = connection
-	connect.then(() => {
-		var collection = client.db("test").collection("devices");
-		collection.find({test: 'Success'}).toArray((err, items) => {
-			console.log(items)
-		})
-		collection.insertOne({test: 'Success'}, (err, res) => {
-			if(err) throw err
-		})
-	}).catch(function(err) {
-		console.log(err)
-	})
+	//DEBUG
+	//uncomment to clean the searches database (only need to do this if we reformat the data)
+	// let connect = connection
+	// connect.then(() => {
+	// 	let collection = client.db("users").collection("searches")
+	// 	collection.remove({})
+	// })
 })
 
 //removes all non a-Z and space characters
@@ -86,16 +65,50 @@ const removeSpecialCharacters = function(str)
 	return s
 }
 
+const isFoodBetter = function(oldFood, newFood, order)
+{
+	switch(order)
+	{
+		case 0: //max calories
+			return newFood.ENERC_KCAL > oldFood.ENERC_KCAL;
+		case 1: //min calories
+			return newFood.ENERC_KCAL < oldFood.ENERC_KCAL;
+			break;
+		case 2: //max fat
+			return newFood.FAT > oldFood.FAT;
+			break;
+		case 3: //min fat
+			return newFood.FAT < oldFood.FAT;
+			break;
+		case 4: //max carbs
+			return newFood.CHOCDF > oldFood.CHOCDF;
+			break;
+		case 5: //min carbs
+			return newFood.CHOCDF < oldFood.CHOCDF;
+			break;
+		case 6: //max protein
+			return newFood.PROCNT > oldFood.PROCNT;
+			break;
+		case 7: //min protein
+			return newFood.PROCNT < oldFood.PROCNT;
+			break;
+		default:
+			console.log("Not a valid search sorting order")
+			return false;
+	}
+}
+
 app.post('/', urlencodedParser, function (req, res) {
     // TODO: validate POST data to check for errors
 	const debug = req.body['debug']
-	let userRadius, userPriceLimit, userSearchString, searchAddress
-	if(debug)
+	let userRadius, userPriceLimit, userSearchString, searchAddress, searchOrder, topFood
+	if(debug == 1)
 	{
 		userRadius = 1
 		userPriceLimit = 15
 		userSearchString = "chicken"
 		searchAddress = "02215"
+		searchOrder = 2
 	}
 	else
 	{
@@ -103,10 +116,14 @@ app.post('/', urlencodedParser, function (req, res) {
 		userPriceLimit = req.body['price']
 		userSearchString = req.body['meal']
 		searchAddress = req.body['street-address']
+		searchOrder = parseInt(req.body['order'])
 	}
 	const userSearchWords = userSearchString.toLowerCase().split(" ");
 	
-	var topFood = {ENERC_KCAL: 0}
+	if(searchOrder % 2 == 0) //user is searching for max, so start at 0
+		topFood = {ENERC_KCAL: 0, FAT: 0, CHOCDF: 0, PROCNT: 0}
+	else //user is search for min, so start at very large number
+		topFood = {ENERC_KCAL: Number.MAX_SAFE_INTEGER, FAT: Number.MAX_SAFE_INTEGER, CHOCDF: Number.MAX_SAFE_INTEGER, PROCNT: Number.MAX_SAFE_INTEGER}
 	var topRest = {}
     
     const getRestNames = function(callback){
@@ -165,15 +182,15 @@ app.post('/', urlencodedParser, function (req, res) {
                         	let currFood = info.hints[i].food.nutrients;
 	                        if(currFood != {})
 	                        {
-		                        if (currFood.ENERC_KCAL > topFood.ENERC_KCAL) {
+		                        if (isFoodBetter(topFood, currFood, searchOrder)) {
 			                        topFood = currFood;
 			                        topFood["name"] = mealName;
 			                        topRest = restJSON.restaurants[rest.restIndex];
 			                        
 			                        //if debug then just return the first food so we don't waste precious api calls
-			                        if(debug)
+			                        //if(debug)
 			                        {
-			                        	break;
+				                        resolve(info.hints[i].food.nutrients);
 			                        }
 		                        }
 	                        }
@@ -309,19 +326,23 @@ app.post('/', urlencodedParser, function (req, res) {
     
     async.waterfall([getRestNames, getRestMenus], function renderResult(error, topFood, topRest){
         if (error) {
-            res.render('index-result', {result: 'Error processing'})
+        	console.log(error)
+            res.render('index-result', {menuItem: 'Error processing', restaurant: 'Error processing'})
         }
         else {
             res.render('index-result', {menuItem: topFood, restaurant: topRest})
 	        if(req.user) {
 		        let connect = connection
 		        connect.then(() => {
-			        var collection = client.db("users").collection("searches");
-			        collection.insertOne({user: req.user,
+			        client.db("users").collection("searches").insertOne({
+				            user: req.user,
 				            radius: userRadius,
 				            priceLimit: userPriceLimit,
 				            searchString: userSearchString,
-			                address: searchAddress}, (err, res) => {
+			                address: searchAddress,
+				            resultFood: topFood,
+				            resultRest: topRest,
+			                order: searchOrder}, (err, res) => {
 				        if (err) throw err
 			        })
 		        }).catch(function (err) {
@@ -348,14 +369,18 @@ app.get('/logout', function (req, res) {
     res.redirect('/')
 })
 
-app.get('/register', function (req, res) {
-    res.render('register')
-})
-
 app.get('/profile', 
     require('connect-ensure-login').ensureLoggedIn(),
     function (req, res) {
-        res.render('profile', { user: req.user })
+		let connect = connection
+	    connect.then(() => {
+		    var collection = client.db("users").collection("searches");
+		    collection.find({user: req.user}).toArray(function(err, arr){
+			    res.render('profile', { user: req.user, searches: arr })
+		    })
+	    }).catch(function(err){
+	    	console.log(err)
+	    })
 })
 
 app.listen(app.get('port'), function () {
