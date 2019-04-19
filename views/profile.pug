@@ -33,6 +33,20 @@ html(language=en)
 		p #{user.displayName}
 		h1 Searches:
 		div(class='table')
+			div(class='th')
+				div(class='td') Meal
+				div(class='td') Restaurant
+				div(class='td') Search Address
+				div(class='td') Search String
+				div(class='td') Radius
+				div(class='td') Price Limit
+				div(class='td') Search Order
+				div(class='td') Cal
+				div(class='td') Fat
+				div(class='td') Carb
+				div(class='td') Pro
+				div(class='td') Restaurant Link
+				div(class='td') Redo Search
 			each search in searches
 				form(class='tr', action='/research', method='post')
 					input(type='hidden', name='re_street-address', value=search.address)

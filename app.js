@@ -101,7 +101,7 @@ const isFoodBetter = function(oldFood, newFood, order)
 app.post('/', urlencodedParser, function (req, res) {
     // TODO: validate POST data to check for errors
 	const debug = req.body['debug']
-	let userRadius, userPriceLimit, userSearchString, searchAddress, searchOrder, topFood
+	let userRadius, userPriceLimit, userSearchString, searchAddress, searchOrder, topFood, foodFound = false
 	if(debug == 1)
 	{
 		userRadius = 1
@@ -184,6 +184,7 @@ app.post('/', urlencodedParser, function (req, res) {
 	                        if(currFood != {})
 	                        {
 		                        if (isFoodBetter(topFood, currFood, searchOrder)) {
+		                        	foodFound = true
 			                        topFood = currFood;
 			                        topFood["name"] = mealName;
 			                        topRest = restJSON.restaurants[rest.restIndex];
@@ -300,16 +301,18 @@ app.post('/', urlencodedParser, function (req, res) {
 			            }
 		            	else {
 				            const thisRest = restaurants.pop();
-				            var options = {
-					            method: 'GET',
-					            url: 'https://eatstreet.com/publicapi/v1/restaurant/' + thisRest.restKey + '/menu',
-					            qs: {
-						            'access-token': process.env.EATSTREET_KEY,
-						            'apiKey': thisRest.restKey
+				            if(thisRest != undefined) {
+					            var options = {
+						            method: 'GET',
+						            url: 'https://eatstreet.com/publicapi/v1/restaurant/' + thisRest.restKey + '/menu',
+						            qs: {
+							            'access-token': process.env.EATSTREET_KEY,
+							            'apiKey': thisRest.restKey
+						            }
 					            }
+					
+					            Promise.resolve(addFoodsToMenu(options, thisRest));
 				            }
-				            
-				            Promise.resolve(addFoodsToMenu(options, thisRest));
 			            }
 		            }
 		            
@@ -331,7 +334,11 @@ app.post('/', urlencodedParser, function (req, res) {
     }
     
     async.waterfall([getRestNames, getRestMenus], function renderResult(error, topFood, topRest){
-        if (error) {
+    	if(!foodFound)
+	    {
+		    res.render('index-result', {error: 'No foods found. Refine Search and try again'})
+	    }
+        else if (error) {
         	console.log(error)
             res.render('index-result', {menuItem: 'Error processing', restaurant: 'Error processing'})
         }
@@ -394,7 +401,7 @@ app.get('/profile',
 	    connect.then(() => {
 		    var collection = client.db("users").collection("searches");
 		    collection.find({user: req.user}).toArray(function(err, arr){
-			    res.render('profile', { user: req.user, searches: arr })
+			    res.render('profile', { user: req.user, searches: arr.reverse() })
 		    })
 	    }).catch(function(err){
 	    	console.log(err)
