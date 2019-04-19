@@ -28,8 +28,8 @@ html(language=en)
 		</nav>
 
 		<div class="container">
-		p ID: #{user.id} </br>
-		p Name: #{user.displayName}
+		<img src="#{user._json.picture}" height='100' width='100'>
+		p #{user.displayName}
 		h1 Searches:
 		table
 			thead
