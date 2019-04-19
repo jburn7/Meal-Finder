@@ -60,6 +60,10 @@ html(language=en)
 							td Max Protein
 						when 7
 							td Min Protein
+					td= Math.round(search.resultFood.ENERC_KCAL)
+					td= Math.round(search.resultFood.FAT)
+					td= Math.round(search.resultFood.CHOCDF)
+					td= Math.round(search.resultFood.PROCNT)
 					td <a href=#{search.resultRest.url}>#{search.resultRest.url}</a>
 		<a href="/logout">Log Out</a>
 		</div>
