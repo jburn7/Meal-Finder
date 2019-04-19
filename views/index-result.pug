@@ -57,7 +57,14 @@ html(language=en)
         p= 'Carbohydrates: ' + Math.round(menuItem.CHOCDF)
         p= 'Protein: ' + Math.round(menuItem.PROCNT)
       </div>
-
+      <form method="POST" action="/savesearch">
+        <input type="hidden" name="food" value="#{menuItem.name}">
+        <input type="hidden" name="restaurant" value="#{restaurant.name}">
+        <input type="submit" class="btn btn-dark" value="Save Search">
+      </form>
+      p Note: Save Search function only works when logged in
+      </br>
+      </br>
     p Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]
     img(src="images/edamam_logo.jpg")
     </div>
