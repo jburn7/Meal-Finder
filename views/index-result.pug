@@ -50,8 +50,12 @@ html(language=en)
 
       p Here is the best food that suits your needs
       <div class="container">
-        p #{menuItem.name} </br>
-        p #{restaurant.name}
+        p Food: #{menuItem.name} </br>
+        p Restaurant: #{restaurant.name} - <a href=#{restaurant.url}>#{restaurant.url}</a> </br>
+        p= 'Calories: ' + Math.round(menuItem.ENERC_KCAL)
+        p= 'Fat: ' + Math.round(menuItem.FAT)
+        p= 'Carbohydrates: ' + Math.round(menuItem.CHOCDF)
+        p= 'Protein: ' + Math.round(menuItem.PROCNT)
       </div>
 
     p Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]
