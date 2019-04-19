@@ -12,3 +12,32 @@ body {
 ul {
   text-align: left;
 }
+
+.table {
+  display: table;
+  width: 100%;
+  border: 1px solid black;
+}
+
+.tr:nth-child(odd){
+  background-color: #a0a0a0;
+}
+.tr:hover{
+  background-color: slategray;
+}
+
+.th{
+  background-color: palegreen;
+}
+
+.tr, .th {
+  display: table-row-group;
+  border: 1px solid black;
+}
+
+.td {
+  display: table-cell;
+  width: 50%;
+  border: 1px solid black;
+  padding: 10px;
+}

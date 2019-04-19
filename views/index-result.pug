@@ -45,26 +45,30 @@ html(language=en)
         option(value=5) Min Carbs
         option(value=6) Max Protein
         option(value=7) Min Protein
-      <input type="submit" value="Submit">
+      <input type="submit" value="Search">
       </form>
 
-      p Here is the best food that suits your needs
-      <div class="container">
-        p Food: #{menuItem.name} </br>
-        p Restaurant: #{restaurant.name} - <a href=#{restaurant.url}>#{restaurant.url}</a> </br>
-        p= 'Calories: ' + Math.round(menuItem.ENERC_KCAL)
-        p= 'Fat: ' + Math.round(menuItem.FAT)
-        p= 'Carbohydrates: ' + Math.round(menuItem.CHOCDF)
-        p= 'Protein: ' + Math.round(menuItem.PROCNT)
-      </div>
-      <form method="POST" action="/savesearch">
-        <input type="hidden" name="food" value="#{menuItem.name}">
-        <input type="hidden" name="restaurant" value="#{restaurant.name}">
-        <input type="submit" class="btn btn-dark" value="Save Search">
-      </form>
-      p Note: Save Search function only works when logged in
-      </br>
-      </br>
+      if error
+        p #{error}
+      else
+          p Here is the best food that suits your needs
+          <div class="container">
+            p Food: #{menuItem.name} </br>
+            p Restaurant: #{restaurant.name} - <a href=#{restaurant.url}>#{restaurant.url}</a> </br>
+            p= 'Calories: ' + Math.round(menuItem.ENERC_KCAL)
+            p= 'Fat: ' + Math.round(menuItem.FAT)
+            p= 'Carbohydrates: ' + Math.round(menuItem.CHOCDF)
+            p= 'Protein: ' + Math.round(menuItem.PROCNT)
+          </div>
+          <form method="POST" action="/savesearch">
+            <input type="hidden" name="food" value="#{menuItem.name}">
+            <input type="hidden" name="restaurant" value="#{restaurant.name}">
+            <input type="submit" class="btn btn-dark" value="Save Search">
+          </form>
+          p Note: Save Search function only works when logged in
+          </br>
+          </br>
+
     p Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]
     img(src="images/edamam_logo.jpg")
     </div>
