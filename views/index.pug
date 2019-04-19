@@ -3,11 +3,44 @@ html(language=en)
   head
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  style.
+    video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      z-index: 0;
+      -ms-transform: translateX(-50%) translateY(-50%);
+      -moz-transform: translateX(-50%) translateY(-50%);
+      -webkit-transform: translateX(-50%) translateY(-50%);
+      transform: translateX(-50%) translateY(-50%);
+    }
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    
-    title CS411 App
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      opacity: 0.5;
+      z-index: 1;}
+
+    .container {
+      position: absolute;
+      z-index: 2;}
+
+
+    form { margin: 50px 50px;}
+
+    input { padding: 10px 0px; margin-bottom: 10px; background-color: white; outline: none; barder: 0px; width: 200px;}
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  title CS411 App
   body
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <a class="navbar-brand" href="/">CS411</a>
@@ -26,6 +59,11 @@ html(language=en)
         </a>
       </div>
     </nav>
+
+    <div class="overlay"></div>
+    <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop">
+      <source src="images/180914_1_03.mp4" type="video/mp4">
+    </video>
 
     <div class="container">
       h1 CS 411 Prototype
@@ -72,7 +110,7 @@ html(language=en)
             else
               option(value=7) Min Calories
           </select>
-          <input type="submit" value="Submit">
+          <input type="submit" value="Search">
         </form>
       else
         <form method="POST" action="/">
@@ -90,7 +128,7 @@ html(language=en)
             option(value=5) Min Carbs
             option(value=6) Max Protein
             option(value=7) Min Protein
-          <input type="submit" value="Submit">
+          <input type="submit" value="Search">
         </form>
 
       p Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]
