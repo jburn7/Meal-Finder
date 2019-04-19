@@ -122,7 +122,7 @@ app.post('/', urlencodedParser, function (req, res) {
 	
 	if(searchOrder % 2 == 0) //user is searching for max, so start at 0
 		topFood = {ENERC_KCAL: 0, FAT: 0, CHOCDF: 0, PROCNT: 0}
-	else //user is search for min, so start at very large number
+	else //user is searching for min, so start at very large number
 		topFood = {ENERC_KCAL: Number.MAX_SAFE_INTEGER, FAT: Number.MAX_SAFE_INTEGER, CHOCDF: Number.MAX_SAFE_INTEGER, PROCNT: Number.MAX_SAFE_INTEGER}
 	var topRest = {}
     
@@ -187,6 +187,7 @@ app.post('/', urlencodedParser, function (req, res) {
 			                        topFood["name"] = mealName;
 			                        topRest = restJSON.restaurants[rest.restIndex];
 			                        
+			                        //DEBUG
 			                        //if debug then just return the first food so we don't waste precious api calls
 			                        //if(debug)
 			                        {
@@ -203,7 +204,8 @@ app.post('/', urlencodedParser, function (req, res) {
                 }
                 
                 else {
-                    reject("bad response when getting edamam nutrition");
+                    console.log("bad response when getting edamam nutrition");
+                    resolve({});
                 }
             });
         })
@@ -245,7 +247,7 @@ app.post('/', urlencodedParser, function (req, res) {
             //cap the number of calls to 100, which is Edamam's food database limit per minute
 	        //TODO: instead of taking the first 100 available meals, sort all of them by how strongly they match the user's search and
 	        // look up nutrition for only the top 100 matches
-	        var callsRemaining = 100;
+	        var callsRemaining = 10;
             var foodsToLookup = [];
             
             let addFoodsToMenu = function(options, thisRest)
@@ -314,7 +316,9 @@ app.post('/', urlencodedParser, function (req, res) {
 	            })
             }
             
-            var rest_keysDebug = [rest_keys[0], rest_keys[1]];
+            var rest_keysDebug = rest_keys;
+            //if(debug == 1)
+                rest_keysDebug = [rest_keys[0], rest_keys[1]];
 	        
 	        let menuPromise = pollMenusForFood(rest_keysDebug);
 	        Promise.resolve(menuPromise).then(() =>
@@ -351,6 +355,18 @@ app.post('/', urlencodedParser, function (req, res) {
 	        }
         }
     })
+})
+
+//render index page with values filled in already
+app.post('/research', urlencodedParser, function (req, res){
+	res.render('index', {
+		debug: 0,
+		re_street_address: req.body['re_street-address'],
+		re_meal: req.body['re_meal'],
+		re_radius: req.body['re_radius'],
+		re_price: req.body['re_price'],
+		re_order: req.body['order']
+		})
 })
 
 app.get('/login', function (req, res) {

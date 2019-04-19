@@ -29,25 +29,69 @@ html(language=en)
 
     <div class="container">
       h1 CS 411 Prototype
-      p Enter search parameters below. Only supports max calories
+      p Enter search parameters below
 
-      <form method="POST" action="/">
-        <input type="text" placeholder="debug 1 or 0" name="debug">
-        <input type="text" placeholder="address or zip code" name="street-address">
-        <input type="text" placeholder="meal ingredients" name="meal">
-        <input type="text" placeholder="radius (miles)" name="radius">
-        <input type="text" placeholder="price limit" name="price">
-        select(name='order')
-          option(value=0) Max Calories
-          option(value=1) Min Calories
-          option(value=2) Max Fat
-          option(value=3) Min Fat
-          option(value=4) Max Carbs
-          option(value=5) Min Carbs
-          option(value=6) Max Protein
-          option(value=7) Min Protein
-        <input type="submit" value="Submit">
-      </form>
+      if re_street_address
+        <form method="POST" action="/">
+          <input type="text" placeholder="debug 1 or 0" name="debug" value=#{debug}>
+          <input type="text" placeholder="address or zip code" name="street-address" value=#{re_street_address}>
+          <input type="text" placeholder="meal ingredients" name="meal" value=#{re_meal}>
+          <input type="text" placeholder="radius (miles)" name="radius" value=#{re_radius}>
+          <input type="text" placeholder="price limit" name="price" value=#{re_order}>
+          <select name='order'>
+            if re_order == 0
+              <option value=0 selected)> Max Calories </option>
+            else
+              option(value=0) Max Calories
+            if re_order == 1
+              <option value=1 selected)> Min Calories </option>
+            else
+              option(value=1) Min Calories
+            if re_order == 2
+              option(value=2, selected='selected') Max Calories
+            else
+              option(value=2) Max Fat
+            if re_order == 3
+              option(value=3, selected='selected') Min Fat
+            else
+              option(value=3) Min Fat
+            if re_order == 4
+              option(value=4, selected='selected') Max Carbs
+            else
+              option(value=4) Max Carbs
+            if re_order == 5
+              option(value=5, selected='selected') Min Carbs
+            else
+              option(value=5) Min Carbs
+            if re_order == 6
+              option(value=6, selected='selected') Max Protein
+            else
+              option(value=6) Min Protein
+            if re_order == 7
+              option(value=7, selected='selected') Min Calories
+            else
+              option(value=7) Min Calories
+          </select>
+          <input type="submit" value="Submit">
+        </form>
+      else
+        <form method="POST" action="/">
+          <input type="text" placeholder="debug 1 or 0" name="debug">
+          <input type="text" placeholder="address or zip code" name="street-address">
+          <input type="text" placeholder="meal ingredients" name="meal">
+          <input type="text" placeholder="radius (miles)" name="radius">
+          <input type="text" placeholder="price limit" name="price">
+          select(name='order')
+            option(value=0) Max Calories
+            option(value=1) Min Calories
+            option(value=2) Max Fat
+            option(value=3) Min Fat
+            option(value=4) Max Carbs
+            option(value=5) Min Carbs
+            option(value=6) Max Protein
+            option(value=7) Min Protein
+          <input type="submit" value="Submit">
+        </form>
 
       p Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]
       img(src="images/edamam_logo.jpg")

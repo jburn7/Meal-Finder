@@ -31,35 +31,40 @@ html(language=en)
 		p ID: #{user.id} </br>
 		p Name: #{user.displayName}
 		h1 Searches:
-		table
-			thead
-				tr: th
-			tbody
-				each search in searches
-					tr
-					td #{search.resultFood.name}
-					td #{search.resultRest.name}
-					td #{search.address}
-					td #{search.searchString}
-					td #{search.radius}
-					td #{search.priceLimit}
+		div(class='table')
+			each search in searches
+				form(class='tr', action='/research', method='post')
+					input(type='hidden', name='re_street-address', value=search.address)
+					input(type='hidden', name='re_meal', value=search.searchString)
+					input(type='hidden', name='re_radius', value=search.radius)
+					input(type='hidden', name='re_price', value=search.priceLimit)
+					input(type='hidden', name='re_order', value=search.order)
+					span(class='td') #{search.resultFood.name}
+					span(class='td') #{search.resultRest.name}
+					span(class='td') #{search.address}
+					span(class='td') #{search.searchString}
+					span(class='td') #{search.radius}
+					span(class='td') #{search.priceLimit}
 					case search.order
 						when 0
-							td Max Calories
+							span(class='td') Max Calories
 						when 1
-							td Min Calories
+							span(class='td') Min Calories
 						when 2
-							td Max Fat
+							span(class='td') Max Fat
 						when 3
-							td Min Fat
+							span(class='td') Min Fat
 						when 4
-							td Max Carbs
+							span(class='td') Max Carbs
 						when 5
-							td Min Carbs
+							span(class='td') Min Carbs
 						when 6
-							td Max Protein
+							span(class='td') Max Protein
 						when 7
-							td Min Protein
+							span(class='td') Min Protein
+
+					span(class='td')
+						input(type='submit', value='Submit')
 		<a href="/logout">Log Out</a>
 		</div>
 
