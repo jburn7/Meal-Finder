@@ -51,7 +51,8 @@ html(language=en)
       p Here is the best food that suits your needs
       <div class="container">
         p #{menuItem.name} </br>
-        p #{restaurant.name}
+        p #{restaurant.name} </br>
+        p <a href=#{restaurant.url}>#{restaurant.url}</a>
       </div>
 
     p Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]
