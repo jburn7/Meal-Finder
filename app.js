@@ -147,7 +147,8 @@ app.post('/', urlencodedParser, function (req, res) {
                             info = JSON.parse(body);
                             resolve(info)
                         } else {
-                            reject("bad response for getting restaurant");
+                            console.log("bad response for getting restaurant" + response.statusCode);
+                            resolve({});
                         }
                     })
                 })
@@ -204,7 +205,7 @@ app.post('/', urlencodedParser, function (req, res) {
                 }
                 
                 else {
-                    console.log("bad response when getting edamam nutrition");
+                    console.log("bad response when getting edamam nutrition" + response.statusCode);
                     resolve({});
                 }
             });
@@ -276,6 +277,7 @@ app.post('/', urlencodedParser, function (req, res) {
 					            reject("bad response when getting menu");
 				            } else {
 					            console.log("too many reqs per second for Eat Street API");
+					            resolve();
 				            }
 			            }
 		            })
@@ -365,7 +367,7 @@ app.post('/research', urlencodedParser, function (req, res){
 		re_meal: req.body['re_meal'],
 		re_radius: req.body['re_radius'],
 		re_price: req.body['re_price'],
-		re_order: req.body['order']
+		re_order: parseInt(req.body['re_order'])
 		})
 })
 

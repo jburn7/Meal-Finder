@@ -7,6 +7,7 @@ html(language=en)
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+		link(rel="stylesheet", href="/css/style.css", type="text/css")
 		title CS411 App
 	body
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -62,14 +63,16 @@ html(language=en)
 							span(class='td') Max Protein
 						when 7
 							span(class='td') Min Protein
-					span(class='td')
-						input(type='submit', value='Submit')
 
-					span(class='td') Math.round(search.resultFood.ENERC_KCAL)
-					span(class='td') Math.round(search.resultFood.FAT)
-					span(class='td') Math.round(search.resultFood.CHOCDF)
-					span(class='td') Math.round(search.resultFood.PROCNT)
+					span(class='td') Cal: #{Math.round(search.resultFood.ENERC_KCAL)}
+					span(class='td') Fat: #{Math.round(search.resultFood.FAT)}
+					span(class='td') Carbs: #{Math.round(search.resultFood.CHOCDF)}
+					span(class='td') Prot: #{Math.round(search.resultFood.PROCNT)}
 					span(class='td') <a href=#{search.resultRest.url}>#{search.resultRest.url}</a>
+					span(class='td')
+						input(type='submit', value='Redo Search')
+
+
 		<a href="/logout">Log Out</a>
 		</div>
 

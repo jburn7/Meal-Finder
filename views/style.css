@@ -1,0 +1,22 @@
+body {
+    background-color: #F2F2F2;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+    margin: auto;
+    width: 50%;
+    text-align: center;
+}
+
+ul {
+    text-align: left;
+}
+
+.td{
+    background-color: #61dafb;
+}
+
+.table{
+    background-color: #282c34;
+}
