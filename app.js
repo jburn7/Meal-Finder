@@ -366,6 +366,25 @@ app.post('/', urlencodedParser, function (req, res) {
     })
 })
 
+app.post('/savesearch', urlencodedParser, function (req, res) {
+    if(req.user) {
+        let connect = connection
+        connect.then(() => {
+            client.db("users").collection("saved_searches").insertOne({
+                    user: req.user,
+                    resultFood: req.body['food'],
+                    resultRest: req.body['restaurant']}, (err, res) => {
+                if (err) throw err
+            })
+        }).catch(function (err) {
+            console.log(err)
+        })
+    }   
+
+    res.render('index')
+})
+
+
 //render index page with values filled in already
 app.post('/research', urlencodedParser, function (req, res){
 	res.render('index', {
@@ -398,10 +417,14 @@ app.get('/profile',
     require('connect-ensure-login').ensureLoggedIn(),
     function (req, res) {
 		let connect = connection
+        var search_arr = []
 	    connect.then(() => {
 		    var collection = client.db("users").collection("searches");
 		    collection.find({user: req.user}).toArray(function(err, arr){
-			    res.render('profile', { user: req.user, searches: arr.reverse() })
+                search_arr = arr
+                client.db("users").collection("saved_searches").find({user: req.user}).toArray(function(err, arr){
+                    res.render('profile', { user: req.user, searches: search_arr.reverse(), saved_searches: arr })
+                }) 
 		    })
 	    }).catch(function(err){
 	    	console.log(err)
