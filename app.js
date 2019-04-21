@@ -387,7 +387,7 @@ app.post('/savesearch', urlencodedParser, function (req, res) {
         })
     }   
 
-    res.render('index')
+    res.redirect('/profile')
 })
 
 

@@ -32,9 +32,9 @@ html(language=en)
 			<div class="user">
 				<img src="#{user._json.picture}" height='100' width='100'>
 				p #{user.displayName}
-				<a href="/logout">Log Out</a>
+				<a href="/logout"><button class="btn btn-danger" type="button">Log Out</button></a>
 			</div>
-		h1 Recent Searches:
+		h1 Recent Searches
 		div(class='table')
 			div(class='th')
 				div(class='td') Meal
@@ -87,9 +87,9 @@ html(language=en)
 					span(class='td') Prot: #{Math.round(search.resultFood.PROCNT)}
 					span(class='td') <a href=#{search.resultRest.url}>#{search.resultRest.url}</a>
 					span(class='td')
-						input(type='submit', value='Redo Search')
+						input(type='submit', class="btn btn-success", value='Redo Search')
 
-		h1 Favorite Foods:
+		h1 Favorite Foods
 		div(class='table')
 			div(class='th')
 				div(class='td') Meal
