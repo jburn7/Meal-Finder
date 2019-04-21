@@ -5,7 +5,6 @@ video {
     min-width: 100%;
     min-height: 100%;
     width: 100vh;
-    height: auto;
     z-index: 0;
     -ms-transform: translateX(-50%) translateY(-50%);
     -moz-transform: translateX(-50%) translateY(-50%);
@@ -19,12 +18,11 @@ video {
     left: 0;
     height: 100%;
     width: 100%;
-    opacity: 0.75;
+    opacity: 0.80;
 }
 
 .container {
     position: absolute;
-    height: 100vh;
     top: 10%;
     left: 0;
     z-index: 2;
@@ -95,5 +93,3 @@ video {
         align-items: stretch;
     }
 }
-
-input { padding: 5px 0px; margin-bottom: 10px; background-color: white; outline: none; width: 200px;}
