@@ -390,6 +390,18 @@ app.post('/savesearch', urlencodedParser, function (req, res) {
     res.redirect('/profile')
 })
 
+app.post('/deletefood', urlencodedParser, function (req, res) {
+    if(req.user) {
+        let connect = connection
+        connect.then(() => {
+            let collection = client.db("users").collection("saved_searches")
+            collection.deleteMany({ "user.id": req.user.id, 
+                                    resultFood: req.body['food'], 
+                                    resultRest: req.body['restaurant'] })
+        })
+    }
+    res.redirect('/profile')
+})
 
 //render index page with values filled in already
 app.post('/research', urlencodedParser, function (req, res){
