@@ -28,7 +28,7 @@ html(language=en)
     </nav>
 
     <div class="container">
-      h1 CS 411 Prototype
+      h1 Too tired to cook? Find food to order tonight
 
       <form method="POST" action="/">
       <input type="text" placeholder="debug 1 or 0" name="debug">
@@ -63,6 +63,12 @@ html(language=en)
           <form method="POST" action="/savesearch">
             <input type="hidden" name="food" value="#{menuItem.name}">
             <input type="hidden" name="restaurant" value="#{restaurant.name}">
+            <input type="hidden" name="location" value="#{restaurant.city} #{restaurant.state}">
+            <input type="hidden" name="calories" value="#{menuItem.ENERC_KCAL}">
+            <input type="hidden" name="fat" value="#{menuItem.FAT}">
+            <input type="hidden" name="carbs" value="#{menuItem.CHOCDF}">
+            <input type="hidden" name="protein" value="#{menuItem.PROCNT}">
+            <input type="hidden" name="link" value="#{restaurant.url}">
             <input type="submit" class="btn btn-dark" value="Save Food">
           </form>
           p Note: Save Food function only works when logged in
