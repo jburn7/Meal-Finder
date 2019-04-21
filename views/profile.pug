@@ -29,8 +29,11 @@ html(language=en)
 		</nav>
 
 		<div class="container">
-		<img src="#{user._json.picture}" height='100' width='100'>
-		p #{user.displayName}
+			<div class="user">
+				<img src="#{user._json.picture}" height='100' width='100'>
+				p #{user.displayName}
+				<a href="/logout">Log Out</a>
+			</div>
 		h1 Recent Searches:
 		div(class='table')
 			div(class='th')
@@ -69,7 +72,7 @@ html(language=en)
 							span(class='td') Max Fat
 						when 3
 							span(class='td') Min Fat
-						when 4
+						when 4	
 							span(class='td') Max Carbs
 						when 5
 							span(class='td') Min Carbs
@@ -86,12 +89,13 @@ html(language=en)
 					span(class='td')
 						input(type='submit', value='Redo Search')
 
-		h1 Saved Searches:
+		h1 Favorite Foods:
 		div(class='table')
 			each search in saved_searches
-				span(class='td') #{search.resultFood}
-				span(class='td') #{search.resultRest}
-		<a href="/logout">Log Out</a>
+				form(class='tr', action='/research', method='post')
+					span(class='td') #{search.resultFood} 
+					span(class='td') #{search.resultRest}
+
 		</div>		
 
 		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

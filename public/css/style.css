@@ -1,16 +1,26 @@
 body {
-  background-color: #F2F2F2;
-  font-family: Arial, Helvetica, sans-serif;
+/*  background-color: #F2F2F2;*/
+/*  font-family: Arial, Helvetica, sans-serif;*/
 }
 
 .container {
-  margin: auto;
+/*  margin: auto;
   width: 50%;
+  max-width: 800px;*/
   text-align: center;
+}
+
+.user {
+  display: inline-block;
+  padding: 2%;
 }
 
 ul {
   text-align: left;
+}
+
+h1 {
+  margin-top: 2%;
 }
 
 .table {
