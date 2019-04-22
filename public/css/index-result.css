@@ -3,3 +3,40 @@
     top: 85%;
     left: 157vh;
 }
+
+/* Style the form - display items horizontally */
+.form-inline {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+}
+
+/* Add some margins for each label */
+.form-inline label {
+
+    margin: 5px 10px 5px 0;
+}
+
+/* Style the input fields */
+.form-inline input {
+    height: 30px;
+    vertical-align: middle;
+    margin: 5px 10px 5px 0;
+    padding: 10px 10px;
+    background-color: #fff;
+}
+
+/* Style the submit button */
+.form-inline button {
+    margin: 5px 10px 5px 10px;
+    padding: 5px 20px;
+    background-color: gray;
+    color: white;
+    border: hidden;
+    border-radius: 4px;
+}
+
+.form-inline button:hover {
+    background-color: #282c34;
+    border: hidden;
+}
