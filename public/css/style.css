@@ -30,7 +30,7 @@ h1 {
 }
 
 .tr:nth-child(odd){
-  background-color: #a0a0a0;
+  background-color: #e0e0e0;
 }
 .tr:hover{
   background-color: slategray;
