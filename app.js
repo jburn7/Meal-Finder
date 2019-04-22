@@ -373,7 +373,13 @@ app.post('/savesearch', urlencodedParser, function (req, res) {
             client.db("users").collection("saved_searches").insertOne({
                     user: req.user,
                     resultFood: req.body['food'],
-                    resultRest: req.body['restaurant']}, (err, res) => {
+                    resultRest: req.body['restaurant'],
+                    location: req.body['location'],
+                    link: req.body['link'],
+                    calories: req.body['calories'],
+                    fat: req.body['fat'],
+                    carbs: req.body['carbs'],
+                    protein: req.body['protein']}, (err, res) => {
                 if (err) throw err
             })
         }).catch(function (err) {
@@ -381,9 +387,21 @@ app.post('/savesearch', urlencodedParser, function (req, res) {
         })
     }   
 
-    res.render('index')
+    res.redirect('/profile')
 })
 
+app.post('/deletefood', urlencodedParser, function (req, res) {
+    if(req.user) {
+        let connect = connection
+        connect.then(() => {
+            let collection = client.db("users").collection("saved_searches")
+            collection.deleteMany({ "user.id": req.user.id, 
+                                    resultFood: req.body['food'], 
+                                    resultRest: req.body['restaurant'] })
+        })
+    }
+    res.redirect('/profile')
+})
 
 //render index page with values filled in already
 app.post('/research', urlencodedParser, function (req, res){

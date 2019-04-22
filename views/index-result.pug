@@ -6,7 +6,8 @@ html(language=en)
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    
+    link(rel="stylesheet", href="/css/index-result.css", type="text/css")
+
     title CS411 App
   body
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -28,7 +29,7 @@ html(language=en)
     </nav>
 
     <div class="container">
-      h1 CS 411 Prototype
+      h1 Too tired to cook? Find food to order tonight
 
       <form method="POST" action="/">
       <input type="text" placeholder="debug 1 or 0" name="debug">
@@ -45,7 +46,7 @@ html(language=en)
         option(value=5) Min Carbs
         option(value=6) Max Protein
         option(value=7) Min Protein
-      <input type="submit" value="Search">
+      <input type="submit" class="btn btn-success" value="Search">
       </form>
 
       if error
@@ -63,14 +64,21 @@ html(language=en)
           <form method="POST" action="/savesearch">
             <input type="hidden" name="food" value="#{menuItem.name}">
             <input type="hidden" name="restaurant" value="#{restaurant.name}">
-            <input type="submit" class="btn btn-dark" value="Save Search">
+            <input type="hidden" name="location" value="#{restaurant.city} #{restaurant.state}">
+            <input type="hidden" name="calories" value="#{menuItem.ENERC_KCAL}">
+            <input type="hidden" name="fat" value="#{menuItem.FAT}">
+            <input type="hidden" name="carbs" value="#{menuItem.CHOCDF}">
+            <input type="hidden" name="protein" value="#{menuItem.PROCNT}">
+            <input type="hidden" name="link" value="#{restaurant.url}">
+            <input type="submit" class="btn btn-success" value="Save Food">
           </form>
-          p Note: Save Search function only works when logged in
+          p Note: Save Food function only works when logged in
           </br>
           </br>
 
-    p Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]
-    img(src="images/edamam_logo.jpg")
+    <div class="edamam">
+      <img src="images/edamam_logo.jpg" class="align-self-end mr-3">
+      <p>Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]</p>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

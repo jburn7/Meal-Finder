@@ -29,9 +29,12 @@ html(language=en)
 		</nav>
 
 		<div class="container">
-		<img src="#{user._json.picture}" height='100' width='100'>
-		p #{user.displayName}
-		h1 Recent Searches:
+			<div class="user">
+				<img src="#{user._json.picture}" height='100' width='100'>
+				p #{user.displayName}
+				<a href="/logout"><button class="btn btn-danger" type="button">Log Out</button></a>
+			</div>
+		h1 Recent Searches
 		div(class='table')
 			div(class='th')
 				div(class='td') Meal
@@ -47,6 +50,7 @@ html(language=en)
 				div(class='td') Pro
 				div(class='td') Restaurant Link
 				div(class='td') Redo Search
+			- searches.length = 10
 			each search in searches
 				form(class='tr', action='/research', method='post')
 					input(type='hidden', name='re_street-address', value=search.address)
@@ -69,7 +73,7 @@ html(language=en)
 							span(class='td') Max Fat
 						when 3
 							span(class='td') Min Fat
-						when 4
+						when 4	
 							span(class='td') Max Carbs
 						when 5
 							span(class='td') Min Carbs
@@ -84,17 +88,35 @@ html(language=en)
 					span(class='td') Prot: #{Math.round(search.resultFood.PROCNT)}
 					span(class='td') <a href=#{search.resultRest.url}>#{search.resultRest.url}</a>
 					span(class='td')
-						input(type='submit', value='Redo Search')
+						input(type='submit', class="btn btn-success", value='Redo Search')
 
-		h1 Saved Searches:
+		h1 Favorite Foods
 		div(class='table')
+			div(class='th')
+				div(class='td') Meal
+				div(class='td') Restaurant
+				div(class='td') Location
+				div(class='td') Link
+				div(class='td') Calories
+				div(class='td') Fat
+				div(class='td') Carbs
+				div(class='td') Protein
+				div(class='td') Delete Food
 			each search in saved_searches
-				span(class='td') #{search.resultFood}
-				span(class='td')  -
-				span(class='td') #{search.resultRest}
-				<br/>
-		<a href="/logout">Log Out</a>
-		</div>
+				form(class='tr', action='/deletefood', method='post')
+					input(type='hidden', name='food', value=search.resultFood)
+					input(type='hidden', name='restaurant', value=search.resultRest)
+					span(class='td') #{search.resultFood} 
+					span(class='td') #{search.resultRest}
+					span(class='td') #{search.location}
+					span(class='td') <a href=#{search.link}>#{search.link}</a>
+					span(class='td') #{Math.round(search.calories)}
+					span(class='td') #{Math.round(search.fat)}
+					span(class='td') #{Math.round(search.carbs)}
+					span(class='td') #{Math.round(search.protein)}
+					span(class='td') 
+						input(type='submit', class="btn btn-danger", value='Delete')
+		</div>		
 
 		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
