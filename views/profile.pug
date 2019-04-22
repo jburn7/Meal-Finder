@@ -83,18 +83,18 @@ html(language=en)
 					span(class='td') Carbs: #{Math.round(search.resultFood.CHOCDF)}
 					span(class='td') Prot: #{Math.round(search.resultFood.PROCNT)}
 					span(class='td') <a href=#{search.resultRest.url}>#{search.resultRest.url}</a>
-          span(class='td')
+					span(class='td')
 						input(type='submit', value='Redo Search')
 
 		h1 Saved Searches:
 		div(class='table')
 			each search in saved_searches
 				span(class='td') #{search.resultFood}
-				span(class='td')  - 
+				span(class='td')  -
 				span(class='td') #{search.resultRest}
 				<br/>
 		<a href="/logout">Log Out</a>
-		</div>		
+		</div>
 
 		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
