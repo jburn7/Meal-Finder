@@ -1,7 +1,54 @@
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 90%;
+    width: 100%;
+}
+
+h1,
+h2 {
+    text-align: left;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 1px;
+    position: relative;
+    color: #282c34;
+}
+
+
+.container {
+    margin: fill;
+    width: 80%;
+    padding: 30px;
+    position: absolute;
+    top: 8%;
+    left: 30vh;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.navbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 7%;
+    width: 100%;
+    z-index: 1;
+}
+
 .edamam {
     position: absolute;
     top: 85%;
     left: 157vh;
+    z-index: 2;
+}
+
+.cat {
+    position: absolute;
+    top: 10%;
+    left: 103vh;
+    z-index: 2;
 }
 
 /* Style the form - display items horizontally */
