@@ -29,7 +29,8 @@ html(language=en)
     </nav>
 
     <div class="container">
-      h1 Too tired to cook? Find food to order tonight
+      h1 Too tired to cook?
+      h2 Find food to order tonight
 
       <form method="POST" class="form-inline" action="/">
       <input type="text" class="form-control" placeholder="debug 1 or 0" name="debug">
@@ -53,7 +54,7 @@ html(language=en)
         p #{error}
       else
           p Here is the best food that suits your needs
-          <div class="container">
+          <div class="container1">
             p Food: #{menuItem.name} </br>
             p Restaurant: #{restaurant.name} - <a href=#{restaurant.url}>#{restaurant.url}</a> </br>
             p= 'Calories: ' + Math.round(menuItem.ENERC_KCAL)
@@ -75,10 +76,13 @@ html(language=en)
           p Note: Save Food function only works when logged in
           </br>
           </br>
-
+    </div>
     <div class="edamam">
       <img src="images/edamam_logo.jpg" class="align-self-end mr-3">
       <p>Nutrition data powered by #[a(href="https://www.edamam.com/") Edamam]</p>
+    </div>
+    <div class="cat">
+      <img src="images/cat.gif" class="align-self-end mr-3">
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
