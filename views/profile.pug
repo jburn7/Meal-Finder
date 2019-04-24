@@ -50,7 +50,8 @@ html(language=en)
 				div(class='td') Pro
 				div(class='td') Restaurant Link
 				div(class='td') Redo Search
-			- searches.length = 10
+			- if(searches.length >= 10)
+				- searches.length = 10
 			each search in searches
 				form(class='tr', action='/research', method='post')
 					input(type='hidden', name='re_street-address', value=search.address)

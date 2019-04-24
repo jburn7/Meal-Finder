@@ -51,11 +51,13 @@ app.get('/', function (req, res) {
 	
 	//DEBUG
 	//uncomment to clean the searches database (only need to do this if we reformat the data)
-	// let connect = connection
-	// connect.then(() => {
-	// 	let collection = client.db("users").collection("searches")
-	// 	collection.remove({})
-	// })
+	let connect = connection
+	connect.then(() => {
+		let collection = client.db("users").collection("searches")
+		collection.remove({})
+		collection = client.db("users").collection("saved_searches")
+		collection.remove({})
+	})
 })
 
 //removes all non a-Z and space characters
