@@ -87,8 +87,8 @@ html(language=en)
 					span(class='td') Carbs: #{Math.round(search.resultFood.CHOCDF)}
 					span(class='td') Prot: #{Math.round(search.resultFood.PROCNT)}
 					span(class='td') <a href=#{search.resultRest.url}>#{search.resultRest.url}</a>
-					span(class='td')
-						input(type='submit', class="btn btn-success", value='Redo Search')
+					span(class='td') <button type="submit"> Redo Search</button>
+
 
 		h1 Favorite Foods
 		div(class='table')
@@ -114,8 +114,7 @@ html(language=en)
 					span(class='td') #{Math.round(search.fat)}
 					span(class='td') #{Math.round(search.carbs)}
 					span(class='td') #{Math.round(search.protein)}
-					span(class='td') 
-						input(type='submit', class="btn btn-danger", value='Delete')
+					span(class='td') <button type="submit">Delete</button>
 		</div>		
 
 		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
