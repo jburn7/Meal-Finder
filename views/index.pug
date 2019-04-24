@@ -35,7 +35,8 @@ html(language=en)
     </div>
 
     <div class="container">
-      h1 Too tired to cook? Find food to order tonight
+      h1 Too tired to cook?
+      h2 Find food to order tonight
 
       if re_street_address
         <form method="POST" class="form-inline" action="/">
@@ -78,7 +79,7 @@ html(language=en)
             else
               option(value=7) Min Calories
           </select>
-          <input type="submit" value="Search">
+          <button type="submit">Search</button>
         </form>
       else
         <form method="POST" class="form-inline" action="/">
