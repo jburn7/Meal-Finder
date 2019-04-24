@@ -51,13 +51,13 @@ app.get('/', function (req, res) {
 	
 	//DEBUG
 	//uncomment to clean the searches database (only need to do this if we reformat the data)
-	let connect = connection
-	connect.then(() => {
-		let collection = client.db("users").collection("searches")
-		collection.remove({})
-		collection = client.db("users").collection("saved_searches")
-		collection.remove({})
-	})
+	// let connect = connection
+	// connect.then(() => {
+	// 	let collection = client.db("users").collection("searches")
+	// 	collection.remove({})
+	// 	collection = client.db("users").collection("saved_searches")
+	// 	collection.remove({})
+	// })
 })
 
 //removes all non a-Z and space characters
@@ -99,6 +99,17 @@ const isFoodBetter = function(oldFood, newFood, order)
 			return false;
 	}
 }
+
+//Edamam caps at 100 calls per minute, so reset this variable once a minute.
+//this lets multiple clients make calls simultaneously without overrunning our edamam calls
+var callsRemaining = 100;
+let resetEdamamCallLimit = function()
+{
+	callsRemaining = 100;
+	console.log("calls reset")
+	console.log(callsRemaining)
+}
+setInterval(resetEdamamCallLimit, 60000);
 
 app.post('/', urlencodedParser, function (req, res) {
     // TODO: validate POST data to check for errors
@@ -193,7 +204,7 @@ app.post('/', urlencodedParser, function (req, res) {
 			                        
 			                        //DEBUG
 			                        //if debug then just return the first food so we don't waste precious api calls
-			                        //if(debug)
+			                        if(debug)
 			                        {
 				                        resolve(info.hints[i].food.nutrients);
 			                        }
@@ -247,11 +258,10 @@ app.post('/', urlencodedParser, function (req, res) {
                 rest_keys.push({'restKey': restJSON.restaurants[i].apiKey, 'restIndex': i});
                 rest_names.push(restJSON.restaurants[i].name);
             }
-	
-            //cap the number of calls to 100, which is Edamam's food database limit per minute
+            
 	        //TODO: instead of taking the first 100 available meals, sort all of them by how strongly they match the user's search and
 	        // look up nutrition for only the top 100 matches
-	        var callsRemaining = 10;
+	        //var callsRemaining = 100;
             var foodsToLookup = [];
             
             let addFoodsToMenu = function(options, thisRest)
@@ -324,7 +334,7 @@ app.post('/', urlencodedParser, function (req, res) {
             }
             
             var rest_keysDebug = rest_keys;
-            //if(debug == 1)
+            if(debug == 1)
                 rest_keysDebug = [rest_keys[0], rest_keys[1]];
 	        
 	        let menuPromise = pollMenusForFood(rest_keysDebug);
@@ -336,6 +346,7 @@ app.post('/', urlencodedParser, function (req, res) {
     }
     
     async.waterfall([getRestNames, getRestMenus], function renderResult(error, topFood, topRest){
+	    console.log(callsRemaining)
     	if(!foodFound)
 	    {
 		    res.render('index-result', {error: 'No foods found. Refine Search and try again'})

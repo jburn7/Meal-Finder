@@ -40,22 +40,22 @@ html(language=en)
 
       if re_street_address
         <form method="POST" class="form-inline" action="/">
-          <input type="text" class="form-control" placeholder="debug 1 or 0" name="debug" value=#{debug}>
+          <input type="hidden" class="form-control" placeholder="debug 1 or 0" name="debug" value=#{debug}>
           <input type="text" class="form-control" placeholder="address or zip code" name="street-address" value="#{re_street_address}">
           <input type="text" class="form-control" placeholder="meal ingredients" name="meal" value="#{re_meal}">
           <input type="text" class="form-control" placeholder="radius (miles)" name="radius" value=#{re_radius}>
           <input type="text" class="form-control" placeholder="price limit" name="price" value=#{re_price}>
           <select name='order'>
-            if re_order === 0
+            if re_order == 0
               option(value=0, selected) Max Calories
             else
               option(value=0) Max Calories
-            if re_order === 1
+            if re_order == 1
               option(value=1, selected) Min Calories
             else
               option(value=1) Min Calories
             if re_order == 2
-              option(value=2, selected) Max Calories
+              option(value=2, selected) Max Fat
             else
               option(value=2) Max Fat
             if re_order == 3
@@ -73,17 +73,17 @@ html(language=en)
             if re_order == 6
               option(value=6, selected) Max Protein
             else
-              option(value=6) Min Protein
+              option(value=6) Max Protein
             if re_order == 7
-              option(value=7, selected) Min Calories
+              option(value=7, selected) Min Protein
             else
-              option(value=7) Min Calories
+              option(value=7) Min Protein
           </select>
           <button type="submit">Search</button>
         </form>
       else
         <form method="POST" class="form-inline" action="/">
-          <input type="text" class="form-control" placeholder="debug 1 or 0" name="debug">
+          <input type="hidden" class="form-control" placeholder="debug 1 or 0" name="debug" value="0">
           <input type="text" class="form-control" placeholder="address or zip code" name="street-address">
           <input type="text" class="form-control" placeholder="meal ingredients" name="meal">
           <input type="text" class="form-control" placeholder="radius (miles)" name="radius">
