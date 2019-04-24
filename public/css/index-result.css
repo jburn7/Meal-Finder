@@ -1,3 +1,8 @@
+@font-face {
+    font-family: Lato-Bold;
+    src: url('/css/fonts/Lato/Lato-Bold.ttf');
+}
+
 .overlay {
     position: absolute;
     top: 0;
@@ -8,6 +13,7 @@
 
 h1,
 h2 {
+    font-family: Lato-Bold;
     text-align: left;
     font-weight: bold;
     text-transform: uppercase;
@@ -18,12 +24,13 @@ h2 {
 
 
 .container {
+    font-family: Lato-Bold;
     margin: fill;
     width: 80%;
     padding: 30px;
     position: absolute;
     top: 8%;
-    left: 30vh;
+    left: 25vh;
     z-index: 1;
     overflow: hidden;
 }
